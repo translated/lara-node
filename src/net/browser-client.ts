@@ -24,8 +24,9 @@ export class BrowserLaraClient extends LaraClient {
 
         if (body) {
             if (headers["Content-Type"] === "multipart/form-data") {
-                const formBody = new FormData();
+                delete headers["Content-Type"];  // browser will set it automatically
 
+                const formBody = new FormData();
                 for (const [key, value] of Object.entries(body!)) {
                     if (!value) continue;
 

@@ -1,4 +1,3 @@
-
 export interface Memory {
     readonly id: string;
     readonly createdAt: Date;
@@ -9,4 +8,13 @@ export interface Memory {
     readonly secret?: string;
     readonly ownerId: string;
     readonly collaboratorsCount: number;
+}
+
+export interface MemoryImport {
+    readonly id: string;
+    readonly begin: number;
+    readonly end: number;
+    readonly channel: number;
+    readonly size: number;
+    readonly progress: number;
 }
