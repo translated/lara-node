@@ -146,6 +146,10 @@ export class Translator {
         this.memories = new Memories(this.client);
     }
 
+    async getLanguages(): Promise<string[]> {
+        return await this.client.get<string[]>("/languages");
+    }
+
     async translate<T extends string | string[]>(text: T, source: string | null, target: string,
                                                  options?: TranslateOptions): Promise<T extends string ? TextResult : TextResult[]> {
         const q: { text: string }[] = (Array.isArray(text) ? text : [text]).map((item) => {
