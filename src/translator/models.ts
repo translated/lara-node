@@ -25,3 +25,28 @@ export interface TextResult {
     readonly translation: string;
     readonly adaptedTo?: string[];
 }
+
+export interface DocumentSection {
+    readonly text: string;
+    readonly translatable: boolean;
+}
+
+export class Document {
+    readonly sections: DocumentSection[];
+
+    constructor(sections?: DocumentSection[]) {
+        this.sections = sections || [];
+    }
+
+    public addSection(text: string, translatable: boolean = true): Document {
+        this.sections.push({text, translatable});
+        return this;
+    }
+}
+
+export interface DocumentResult {
+    readonly contentType: string;
+    readonly sourceLanguage: string;
+    readonly translations: DocumentSection[];
+    readonly adaptedTo?: string[];
+}

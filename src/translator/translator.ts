@@ -1,6 +1,6 @@
 import {Credentials} from "../credentials";
 import createClient, {LaraClient} from "../net";
-import {Memory, MemoryImport, TextResult} from "./models";
+import {Document, DocumentResult, Memory, MemoryImport, TextResult} from "./models";
 import {LaraApiError, TimeoutError} from "../errors";
 
 export type TranslatorOptions = {
@@ -159,6 +159,17 @@ export class Translator {
         });
 
         return (Array.isArray(text) ? results : results[0]) as T extends string ? TextResult : TextResult[];
+    }
+
+    async translateDocument(document: Document, source: string | null, target: string,
+                            options?: TranslateOptions): Promise<DocumentResult> {
+        const q: { text: string, translatable: boolean }[] = document.sections;
+
+        return await this.client.post<DocumentResult>("/translate/document", {
+            q, source, target, "source_hint": options?.sourceHint, "content_type": options?.contentType,
+            "multiline": options?.multiline !== false, "adapt_to": options?.adaptTo,
+            "instructions": options?.instructions, "timeout": options?.timeoutInMillis
+        });
     }
 
 }
