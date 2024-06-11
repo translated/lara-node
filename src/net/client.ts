@@ -1,5 +1,6 @@
 import {version as SdkVersion} from "../sdk-version";
 import cryptoInstance, {PortableCrypto} from "../crypto";
+import {LaraApiError} from "../errors";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -14,17 +15,6 @@ export type BaseURL = {
 export type ClientResponse = {
     statusCode: number;
     body: any;
-}
-
-export class LaraError extends Error {
-    public readonly statusCode: number;
-    public readonly name: string;
-
-    constructor(statusCode: number, name: string, message: string) {
-        super(message);
-        this.statusCode = statusCode;
-        this.name = name;
-    }
 }
 
 function parseContent(content: any): any {
@@ -124,7 +114,7 @@ export abstract class LaraClient {
             return parseContent(response.body.content);
         } else {
             const error = response.body.error || {}
-            throw new LaraError(
+            throw new LaraApiError(
                 response.statusCode,
                 error.name || "UnknownError",
                 error.message || "An unknown error occurred"

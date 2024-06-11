@@ -1,17 +1,13 @@
 import {Credentials} from "../credentials";
 import createClient, {LaraClient} from "../net";
 import {Memory, MemoryImport} from "./models";
-import {LaraError} from "../net/client";
+import {LaraApiError, TimeoutError} from "../errors";
 
 export type TranslatorOptions = {
     serverUrl?: string,
 }
 
 export type MemoryImportCallback = (memoryImport: MemoryImport) => void;
-
-export class TimeoutError extends Error {
-
-}
 
 export class Memories {
 
@@ -37,7 +33,7 @@ export class Memories {
         try {
             return (await this.client.get<Memory>(`/memories/${id}`)) as Memory;
         } catch (e) {
-            if (e instanceof LaraError && e.statusCode === 404) {
+            if (e instanceof LaraApiError && e.statusCode === 404) {
                 return null;
             }
 
