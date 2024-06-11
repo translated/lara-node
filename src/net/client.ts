@@ -123,10 +123,10 @@ export abstract class LaraClient {
     }
 
     private async sign(method: HttpMethod, path: string, headers: Record<string, string>): Promise<string> {
-        const date = headers["X-Lara-Date"];
-        const contentMD5 = headers["Content-MD5"] || "";
-        const contentType = headers["Content-Type"] || "";
-        const httpMethod = headers["X-HTTP-Method-Override"] || method;
+        const date = headers["X-Lara-Date"].trim();
+        const contentMD5 = (headers["Content-MD5"] || "").trim();
+        const contentType = (headers["Content-Type"] || "").trim();
+        const httpMethod = (headers["X-HTTP-Method-Override"] || method).trim().toUpperCase();
 
         const challenge = `${httpMethod}\n${path}\n${contentMD5}\n${contentType}\n${date}`;
         return await this.crypto.hmac(this.accessKeySecret, challenge);
