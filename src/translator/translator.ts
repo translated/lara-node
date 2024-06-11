@@ -7,12 +7,20 @@ export type TranslatorOptions = {
     serverUrl?: string,
 }
 
+export type MemoryImportCallback = (memoryImport: MemoryImport) => void;
+
+export class TimeoutError extends Error {
+
+}
+
 export class Memories {
 
     private readonly client: LaraClient;
+    private readonly pollingInterval: number;
 
     constructor(client: LaraClient) {
         this.client = client;
+        this.pollingInterval = 2000;
     }
 
     async list(): Promise<Memory[]> {
@@ -104,6 +112,22 @@ export class Memories {
 
     async getImportStatus(id: string): Promise<MemoryImport> {
         return (await this.client.get<MemoryImport>(`/memories/imports/${id}`)) as MemoryImport;
+    }
+
+    async waitForImport(mImport: MemoryImport, updateCallback?: MemoryImportCallback, maxWaitTime?: number): Promise<MemoryImport> {
+        const start = Date.now();
+        while (mImport.progress < 1.) {
+            if (maxWaitTime && Date.now() - start > maxWaitTime)
+                throw new TimeoutError();
+
+            await new Promise(resolve => setTimeout(resolve, this.pollingInterval));
+
+            mImport = await this.getImportStatus(mImport.id);
+            if (updateCallback)
+                updateCallback(mImport);
+        }
+
+        return mImport;
     }
 
 }
