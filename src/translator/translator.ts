@@ -1,6 +1,6 @@
 import {Credentials} from "../credentials";
 import createClient, {LaraClient} from "../net";
-import {Memory, MemoryImport} from "./models";
+import {Memory, MemoryImport, TextResult} from "./models";
 import {LaraApiError, TimeoutError} from "../errors";
 
 export type TranslatorOptions = {
@@ -50,7 +50,7 @@ export class Memories {
     }
 
     async connect<T extends string | string[]>(ids: T): Promise<T extends string ? Memory : Memory[]> {
-        const memories = await this.client.post<Memory[]>('/memories/connect', {
+        const memories = await this.client.post<Memory[]>("/memories/connect", {
             ids: Array.isArray(ids) ? ids : [ids]
         });
 
@@ -79,7 +79,7 @@ export class Memories {
 
         if (Array.isArray(id)) {
             body.ids = id;
-            return await this.client.put<MemoryImport>('/memories/content', body);
+            return await this.client.put<MemoryImport>("/memories/content", body);
         } else {
             return await this.client.put<MemoryImport>(`/memories/${id}/content`, body);
         }
@@ -99,7 +99,7 @@ export class Memories {
 
         if (Array.isArray(id)) {
             body.ids = id;
-            return await this.client.delete<MemoryImport>('/memories/content', body);
+            return await this.client.delete<MemoryImport>("/memories/content", body);
         } else {
             return await this.client.delete<MemoryImport>(`/memories/${id}/content`, body);
         }
@@ -127,6 +127,15 @@ export class Memories {
 
 }
 
+export type TranslateOptions = {
+    sourceHint?: string,
+    adaptTo?: string[],
+    instructions?: string[],
+    contentType?: string,
+    multiline?: boolean,
+    timeoutInMillis?: number
+}
+
 export class Translator {
 
     private readonly client: LaraClient;
@@ -135,6 +144,21 @@ export class Translator {
     constructor(credentials: Credentials, options?: TranslatorOptions) {
         this.client = createClient(credentials.accessKeyId, credentials.accessKeySecret, options?.serverUrl);
         this.memories = new Memories(this.client);
+    }
+
+    async translate<T extends string | string[]>(text: T, source: string | null, target: string,
+                                                 options?: TranslateOptions): Promise<T extends string ? TextResult : TextResult[]> {
+        const q: { text: string }[] = (Array.isArray(text) ? text : [text]).map((item) => {
+            return {text: item};
+        });
+
+        const results = await this.client.post<TextResult[]>("/translate", {
+            q, source, target, "source_hint": options?.sourceHint, "content_type": options?.contentType,
+            "multiline": options?.multiline !== false, "adapt_to": options?.adaptTo,
+            "instructions": options?.instructions, "timeout": options?.timeoutInMillis
+        });
+
+        return (Array.isArray(text) ? results : results[0]) as T extends string ? TextResult : TextResult[];
     }
 
 }

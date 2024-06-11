@@ -18,3 +18,10 @@ export interface MemoryImport {
     readonly size: number;
     readonly progress: number;
 }
+
+export interface TextResult {
+    readonly contentType: string;
+    readonly sourceLanguage: string;
+    readonly translation: string;
+    readonly adaptedTo?: string[];
+}
