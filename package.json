@@ -1,0 +1,44 @@
+{
+  "name": "@translated/lara",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "engines": {
+    "node": ">=12.*"
+  },
+  "scripts": {
+    "build": "rm -rf lib/* lib-browser/* && node scripts/generate-sdk-version.js && tsc && webpack"
+  },
+  "files": [
+    "lib",
+    "LICENSE"
+  ],
+  "keywords": [
+    "lara",
+    "ai",
+    "translate",
+    "translated",
+    "api"
+  ],
+  "author": {
+    "name": "Davide Caroselli",
+    "email": "davide.caroselli@translated.com"
+  },
+  "license": "MIT",
+  "homepage": "https://lara.translated.com",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/translated/lara-node.git"
+  },
+  "description": "Official Lara SDK for JavaScript and Node.js",
+  "dependencies": {
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
