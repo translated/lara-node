@@ -56,23 +56,23 @@ export abstract class LaraClient {
         this.accessKeySecret = accessKeySecret;
     }
 
-    get<T>(path: string, params?: Record<string, any>): Promise<T | T[]> {
+    get<T>(path: string, params?: Record<string, any>): Promise<T> {
         return this.request("GET", path, params);
     }
 
-    delete<T>(path: string, params?: Record<string, any>): Promise<T | T[]> {
+    delete<T>(path: string, params?: Record<string, any>): Promise<T> {
         return this.request("DELETE", path, params);
     }
 
-    post<T>(path: string, body?: Record<string, any>, files?: Record<string, string>): Promise<T | T[]> {
+    post<T>(path: string, body?: Record<string, any>, files?: Record<string, string>): Promise<T> {
         return this.request("POST", path, body, files);
     }
 
-    put<T>(path: string, body?: Record<string, any>, files?: Record<string, string>): Promise<T | T[]> {
+    put<T>(path: string, body?: Record<string, any>, files?: Record<string, string>): Promise<T> {
         return this.request("PUT", path, body, files);
     }
 
-    protected async request<T>(method: HttpMethod, path: string, body?: Record<string, any>, files?: Record<string, any>): Promise<T | T[]> {
+    protected async request<T>(method: HttpMethod, path: string, body?: Record<string, any>, files?: Record<string, any>): Promise<T> {
         if (!path.startsWith("/"))
             path = "/" + path;
 

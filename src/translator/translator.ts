@@ -20,18 +20,18 @@ export class Memories {
     }
 
     async list(): Promise<Memory[]> {
-        return (await this.client.get<Memory>("/memories")) as Memory[];
+        return await this.client.get<Memory[]>("/memories");
     }
 
     async create(name: string, externalId?: string): Promise<Memory> {
-        return (await this.client.post<Memory>("/memories", {
+        return await this.client.post<Memory>("/memories", {
             name, external_id: externalId
-        })) as Memory;
+        });
     }
 
     async get(id: string): Promise<Memory | null> {
         try {
-            return (await this.client.get<Memory>(`/memories/${id}`)) as Memory;
+            return await this.client.get<Memory>(`/memories/${id}`);
         } catch (e) {
             if (e instanceof LaraApiError && e.statusCode === 404) {
                 return null;
@@ -42,28 +42,27 @@ export class Memories {
     }
 
     async delete(id: string): Promise<Memory> {
-        return (await this.client.delete<Memory>(`/memories/${id}`)) as Memory;
+        return await this.client.delete<Memory>(`/memories/${id}`);
     }
 
     async update(id: string, name: string): Promise<Memory> {
-        return (await this.client.put<Memory>(`/memories/${id}`, {name})) as Memory;
+        return await this.client.put<Memory>(`/memories/${id}`, {name});
     }
 
-    async connect(ids: string[]): Promise<Memory[]> {
-        return await this.client.post<Memory>('/memories/connect', {
+    async connect<T extends string | string[]>(ids: T): Promise<T extends string ? Memory : Memory[]> {
+        const memories = await this.client.post<Memory[]>('/memories/connect', {
             ids: Array.isArray(ids) ? ids : [ids]
-        }) as Memory[];
-    }
+        });
 
-    async connectOne(id: string): Promise<Memory | null> {
-        const results = await this.connect([id]);
-        return results.length > 0 ? results[0] : null;
+        return (Array.isArray(ids) ? memories : memories[0]) as T extends string ? Memory : Memory[];
     }
 
     async importTmx(id: string, tmx: any, gzip: boolean = false): Promise<MemoryImport> {
-        return (await this.client.post<MemoryImport>(`/memories/${id}/import`, {
+        return await this.client.post<MemoryImport>(`/memories/${id}/import`, {
             compression: gzip ? 'gzip' : undefined
-        }, {tmx})) as MemoryImport;
+        }, {
+            tmx
+        });
     }
 
     async addTranslation(id: string | string[], source: string, target: string, sentence: string, translation: string,
@@ -80,9 +79,9 @@ export class Memories {
 
         if (Array.isArray(id)) {
             body.ids = id;
-            return (await this.client.put<MemoryImport>('/memories/content', body)) as MemoryImport;
+            return await this.client.put<MemoryImport>('/memories/content', body);
         } else {
-            return (await this.client.put<MemoryImport>(`/memories/${id}/content`, body)) as MemoryImport;
+            return await this.client.put<MemoryImport>(`/memories/${id}/content`, body);
         }
     }
 
@@ -100,14 +99,14 @@ export class Memories {
 
         if (Array.isArray(id)) {
             body.ids = id;
-            return (await this.client.delete<MemoryImport>('/memories/content', body)) as MemoryImport;
+            return await this.client.delete<MemoryImport>('/memories/content', body);
         } else {
-            return (await this.client.delete<MemoryImport>(`/memories/${id}/content`, body)) as MemoryImport;
+            return await this.client.delete<MemoryImport>(`/memories/${id}/content`, body);
         }
     }
 
     async getImportStatus(id: string): Promise<MemoryImport> {
-        return (await this.client.get<MemoryImport>(`/memories/imports/${id}`)) as MemoryImport;
+        return await this.client.get<MemoryImport>(`/memories/imports/${id}`);
     }
 
     async waitForImport(mImport: MemoryImport, updateCallback?: MemoryImportCallback, maxWaitTime?: number): Promise<MemoryImport> {
