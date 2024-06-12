@@ -152,27 +152,19 @@ export class Translator {
 
     async translate<T extends string | string[]>(text: T, source: string | null, target: string,
                                                  options?: TranslateOptions): Promise<T extends string ? TextResult : TextResult[]> {
-        const q: { text: string }[] = (Array.isArray(text) ? text : [text]).map((item) => {
-            return {text: item};
+        return await this.client.post<T extends string ? TextResult : TextResult[]>("/translate", {
+            q: text, source, target, source_hint: options?.sourceHint, content_type: options?.contentType,
+            multiline: options?.multiline !== false, adapt_to: options?.adaptTo,
+            instructions: options?.instructions, timeout: options?.timeoutInMillis
         });
-
-        const results = await this.client.post<TextResult[]>("/translate", {
-            q, source, target, "source_hint": options?.sourceHint, "content_type": options?.contentType,
-            "multiline": options?.multiline !== false, "adapt_to": options?.adaptTo,
-            "instructions": options?.instructions, "timeout": options?.timeoutInMillis
-        });
-
-        return (Array.isArray(text) ? results : results[0]) as T extends string ? TextResult : TextResult[];
     }
 
     async translateDocument(document: Document, source: string | null, target: string,
                             options?: TranslateOptions): Promise<DocumentResult> {
-        const q: { text: string, translatable: boolean }[] = document.sections;
-
         return await this.client.post<DocumentResult>("/translate/document", {
-            q, source, target, "source_hint": options?.sourceHint, "content_type": options?.contentType,
-            "multiline": options?.multiline !== false, "adapt_to": options?.adaptTo,
-            "instructions": options?.instructions, "timeout": options?.timeoutInMillis
+            q: document.sections, source, target, source_hint: options?.sourceHint, content_type: options?.contentType,
+            multiline: options?.multiline !== false, adapt_to: options?.adaptTo,
+            instructions: options?.instructions, timeout: options?.timeoutInMillis
         });
     }
 
