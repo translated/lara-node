@@ -1,6 +1,6 @@
 import {Credentials} from "../credentials";
 import createClient, {LaraClient} from "../net";
-import {Document, DocumentResult, Memory, MemoryImport, TextResult} from "./models";
+import {Memory, MemoryImport, TextBlock, TextResult} from "./models";
 import {LaraApiError, TimeoutError} from "../errors";
 
 export type TranslatorOptions = {
@@ -150,19 +150,10 @@ export class Translator {
         return await this.client.get<string[]>("/languages");
     }
 
-    async translate<T extends string | string[]>(text: T, source: string | null, target: string,
-                                                 options?: TranslateOptions): Promise<T extends string ? TextResult : TextResult[]> {
-        return await this.client.post<T extends string ? TextResult : TextResult[]>("/translate", {
+    async translate<T extends string | string[] | TextBlock[]>(text: T, source: string | null, target: string,
+                                                               options?: TranslateOptions): Promise<TextResult<T>> {
+        return await this.client.post<TextResult<T>>("/translate", {
             q: text, source, target, source_hint: options?.sourceHint, content_type: options?.contentType,
-            multiline: options?.multiline !== false, adapt_to: options?.adaptTo,
-            instructions: options?.instructions, timeout: options?.timeoutInMillis
-        });
-    }
-
-    async translateDocument(document: Document, source: string | null, target: string,
-                            options?: TranslateOptions): Promise<DocumentResult> {
-        return await this.client.post<DocumentResult>("/translate/document", {
-            q: document.sections, source, target, source_hint: options?.sourceHint, content_type: options?.contentType,
             multiline: options?.multiline !== false, adapt_to: options?.adaptTo,
             instructions: options?.instructions, timeout: options?.timeoutInMillis
         });

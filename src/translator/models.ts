@@ -19,34 +19,14 @@ export interface MemoryImport {
     readonly progress: number;
 }
 
-export interface TextResult {
-    readonly contentType: string;
-    readonly sourceLanguage: string;
-    readonly translation: string;
-    readonly adaptedTo?: string[];
-}
-
-export interface DocumentSection {
+export interface TextBlock {
     readonly text: string;
-    readonly translatable: boolean;
+    readonly translatable?: boolean;
 }
 
-export class Document {
-    readonly sections: DocumentSection[];
-
-    constructor(sections?: DocumentSection[]) {
-        this.sections = sections || [];
-    }
-
-    public addSection(text: string, translatable: boolean = true): Document {
-        this.sections.push({text, translatable});
-        return this;
-    }
-}
-
-export interface DocumentResult {
+export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly contentType: string;
     readonly sourceLanguage: string;
-    readonly translations: DocumentSection[];
+    readonly translation: T;
     readonly adaptedTo?: string[];
 }
