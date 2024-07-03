@@ -116,7 +116,7 @@ export abstract class LaraClient {
             const error = response.body.error || {}
             throw new LaraApiError(
                 response.statusCode,
-                error.name || "UnknownError",
+                error.type || "UnknownError",
                 error.message || "An unknown error occurred"
             );
         }
