@@ -133,7 +133,8 @@ export type TranslateOptions = {
     instructions?: string[],
     contentType?: string,
     multiline?: boolean,
-    timeoutInMillis?: number
+    timeoutInMillis?: number,
+    priority?: "normal" | "background",
 }
 
 export class Translator {
@@ -155,7 +156,7 @@ export class Translator {
         return await this.client.post<TextResult<T>>("/translate", {
             q: text, source, target, source_hint: options?.sourceHint, content_type: options?.contentType,
             multiline: options?.multiline !== false, adapt_to: options?.adaptTo,
-            instructions: options?.instructions, timeout: options?.timeoutInMillis
+            instructions: options?.instructions, timeout: options?.timeoutInMillis, priority: options?.priority
         });
     }
 
