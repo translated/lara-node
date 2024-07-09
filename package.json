@@ -7,7 +7,8 @@
     "node": ">=12.*"
   },
   "scripts": {
-    "build": "rm -rf lib/* lib-browser/* && node scripts/generate-sdk-version.js && tsc && webpack"
+    "build": "rm -rf lib/* lib-browser/* && node scripts/generate-sdk-version.js && tsc && webpack",
+    "version": "node scripts/generate-sdk-version.js && git add src/sdk-version.ts"
   },
   "files": [
     "lib",
