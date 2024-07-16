@@ -135,6 +135,8 @@ export type TranslateOptions = {
     multiline?: boolean,
     timeoutInMillis?: number,
     priority?: "normal" | "background",
+    useCache?: boolean | "overwrite",
+    cacheTTLSeconds?: number,
 }
 
 export class Translator {
@@ -154,9 +156,11 @@ export class Translator {
     async translate<T extends string | string[] | TextBlock[]>(text: T, source: string | null, target: string,
                                                                options?: TranslateOptions): Promise<TextResult<T>> {
         return await this.client.post<TextResult<T>>("/translate", {
-            q: text, source, target, source_hint: options?.sourceHint, content_type: options?.contentType,
-            multiline: options?.multiline !== false, adapt_to: options?.adaptTo,
-            instructions: options?.instructions, timeout: options?.timeoutInMillis, priority: options?.priority
+            q: text, source, target, source_hint: options?.sourceHint,
+            content_type: options?.contentType, multiline: options?.multiline !== false,
+            adapt_to: options?.adaptTo, instructions: options?.instructions,
+            timeout: options?.timeoutInMillis, priority: options?.priority,
+            use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds
         });
     }
 
