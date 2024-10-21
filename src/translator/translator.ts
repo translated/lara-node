@@ -141,7 +141,7 @@ export type TranslateOptions = {
 
 export class Translator {
 
-    private readonly client: LaraClient;
+    protected readonly client: LaraClient;
     public readonly memories: Memories;
 
     constructor(credentials: Credentials, options?: TranslatorOptions) {
