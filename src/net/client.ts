@@ -50,10 +50,15 @@ export abstract class LaraClient {
     private readonly crypto: PortableCrypto = cryptoInstance();
     private readonly accessKeyId: string;
     private readonly accessKeySecret: string;
+    private readonly extraHeaders: Record<string, string> = {};
 
     protected constructor(accessKeyId: string, accessKeySecret: string) {
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = accessKeySecret;
+    }
+
+    setExtraHeader(name: string, value: string): void {
+        this.extraHeaders[name] = value;
     }
 
     get<T>(path: string, params?: Record<string, any>): Promise<T> {
@@ -80,7 +85,8 @@ export abstract class LaraClient {
             "X-HTTP-Method-Override": method,
             "X-Lara-Date": new Date().toUTCString(),
             "X-Lara-SDK-Name": "lara-node",
-            'X-Lara-SDK-Version': SdkVersion
+            'X-Lara-SDK-Version': SdkVersion,
+            ...this.extraHeaders
         }
 
         if (body) {
