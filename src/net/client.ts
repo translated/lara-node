@@ -1,6 +1,6 @@
 import {version as SdkVersion} from "../sdk-version";
 import cryptoInstance, {PortableCrypto} from "../crypto";
-import {LaraApiError} from "../errors";
+import {ErrorCodes, LaraApiError} from "../errors";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -123,7 +123,9 @@ export abstract class LaraClient {
             throw new LaraApiError(
                 response.statusCode,
                 error.type || "UnknownError",
-                error.message || "An unknown error occurred"
+                error.code || ErrorCodes.LaraApiError,
+                error.message || "An unknown error occurred",
+                error.details
             );
         }
     }
