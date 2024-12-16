@@ -4,7 +4,7 @@ import {BaseURL, LaraClient} from "./client";
 
 export {LaraClient} from "./client";
 
-const DEFAULT_BASE_URL: string = "https://api.hellolara.ai";
+const DEFAULT_BASE_URL: string = "https://api.laratranslate.com";
 
 export default function create(accessKeyId: string, accessKeySecret: string, baseUrl?: string): LaraClient {
     const url = new URL(baseUrl || DEFAULT_BASE_URL);
