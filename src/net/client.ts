@@ -69,11 +69,11 @@ export abstract class LaraClient {
         return this.request("DELETE", path, params);
     }
 
-    post<T>(path: string, body?: Record<string, any>, files?: Record<string, string>): Promise<T> {
+    post<T>(path: string, body?: Record<string, any>, files?: Record<string, any>): Promise<T> {
         return this.request("POST", path, body, files);
     }
 
-    put<T>(path: string, body?: Record<string, any>, files?: Record<string, string>): Promise<T> {
+    put<T>(path: string, body?: Record<string, any>, files?: Record<string, any>): Promise<T> {
         return this.request("PUT", path, body, files);
     }
 
