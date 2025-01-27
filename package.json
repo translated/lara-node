@@ -33,7 +33,7 @@
   },
   "description": "Official Lara SDK for JavaScript and Node.js",
   "dependencies": {
-    "form-data": "^4.0.0"
+    "form-data": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",
