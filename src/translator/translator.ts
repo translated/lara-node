@@ -2,6 +2,7 @@ import {Credentials} from "../credentials";
 import createClient, {LaraClient} from "../net";
 import {Memory, MemoryImport, TextBlock, TextResult} from "./models";
 import {LaraApiError, TimeoutError} from "../errors";
+import {MultiPartFile} from "../net/client";
 
 export type TranslatorOptions = {
     serverUrl?: string,
@@ -57,7 +58,7 @@ export class Memories {
         return (Array.isArray(ids) ? memories : memories[0]) as T extends string ? Memory : Memory[];
     }
 
-    async importTmx(id: string, tmx: any, gzip: boolean = false): Promise<MemoryImport> {
+    async importTmx(id: string, tmx: MultiPartFile, gzip: boolean = false): Promise<MemoryImport> {
         return await this.client.post<MemoryImport>(`/memories/${id}/import`, {
             compression: gzip ? 'gzip' : undefined
         }, {

@@ -1,4 +1,4 @@
-import {BaseURL, ClientResponse, LaraClient} from "./client";
+import {BaseURL, ClientResponse, LaraClient, MultiPartFile} from "./client";
 
 function hasDefaultPort(port: number, secure: boolean): boolean {
     return port === 80 && !secure || port === 443 && secure;
@@ -49,6 +49,16 @@ export class BrowserLaraClient extends LaraClient {
         });
 
         return {statusCode: response.status, body: await response.json()};
+    }
+
+    protected wrapMultiPartFile(file: MultiPartFile): File {
+        if (file instanceof File)
+            return file;
+
+        throw new TypeError(
+            `Invalid file input in the browser. Expected an instance of File but received ${typeof file}.`
+        );
+
     }
 
 }

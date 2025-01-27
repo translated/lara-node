@@ -1,7 +1,9 @@
 import http from "http";
 import https from "https";
 import FormData from "form-data";
-import {BaseURL, ClientResponse, LaraClient} from "./client";
+import {BaseURL, ClientResponse, LaraClient, MultiPartFile} from "./client";
+import {Readable} from "stream";
+import fs from "fs";
 
 /** @internal */
 export class NodeLaraClient extends LaraClient {
@@ -83,6 +85,18 @@ export class NodeLaraClient extends LaraClient {
                 req.end();
             }
         });
+    }
+
+    protected wrapMultiPartFile(file: MultiPartFile): Readable {
+        if (typeof file === 'string')
+            file = fs.createReadStream(file);
+
+        if (file instanceof Readable)
+            return file;
+
+        throw new TypeError(
+            `Invalid file input in Node.js. Expected a Readable stream or a valid file path, but received ${typeof file}.`
+        );
     }
 
 }
