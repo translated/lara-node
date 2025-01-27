@@ -78,9 +78,10 @@ export class NodeLaraClient extends LaraClient {
                 requestBody.pipe(req);
             } else if (requestBody) {
                 req.write(requestBody);
+                req.end();
+            } else {
+                req.end();
             }
-
-            req.end();
         });
     }
 
