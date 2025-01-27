@@ -1,6 +1,7 @@
 import {version as SdkVersion} from "../sdk-version";
 import cryptoInstance, {PortableCrypto} from "../crypto";
 import {LaraApiError} from "../errors";
+import {Readable} from "node:stream";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -16,6 +17,10 @@ export type ClientResponse = {
     statusCode: number;
     body: any;
 }
+
+export type BrowserMultiPartFile = File;
+export type NodeMultiPartFile = Readable | string;
+export type MultiPartFile = BrowserMultiPartFile | NodeMultiPartFile;
 
 function parseContent(content: any): any {
     if (content === undefined || content === null)
@@ -69,15 +74,15 @@ export abstract class LaraClient {
         return this.request("DELETE", path, params);
     }
 
-    post<T>(path: string, body?: Record<string, any>, files?: Record<string, any>): Promise<T> {
+    post<T>(path: string, body?: Record<string, any>, files?: Record<string, MultiPartFile>): Promise<T> {
         return this.request("POST", path, body, files);
     }
 
-    put<T>(path: string, body?: Record<string, any>, files?: Record<string, any>): Promise<T> {
+    put<T>(path: string, body?: Record<string, any>, files?: Record<string, MultiPartFile>): Promise<T> {
         return this.request("PUT", path, body, files);
     }
 
-    protected async request<T>(method: HttpMethod, path: string, body?: Record<string, any>, files?: Record<string, any>): Promise<T> {
+    protected async request<T>(method: HttpMethod, path: string, body?: Record<string, any>, files?: Record<string, MultiPartFile>): Promise<T> {
         if (!path.startsWith("/"))
             path = "/" + path;
 
@@ -105,6 +110,10 @@ export abstract class LaraClient {
 
         let requestBody: Record<string, any> | undefined = undefined;
         if (files) {
+            // validate files
+            for (const [key, file] of Object.entries(files))
+                files[key] = this.wrapMultiPartFile(file);
+
             headers["Content-Type"] = "multipart/form-data";
             requestBody = Object.assign({}, files, body);
         } else {
@@ -140,4 +149,5 @@ export abstract class LaraClient {
 
     protected abstract send(path: string, headers: Record<string, string>, body?: Record<string, any>): Promise<ClientResponse>;
 
+    protected abstract wrapMultiPartFile(file: MultiPartFile): any;
 }
