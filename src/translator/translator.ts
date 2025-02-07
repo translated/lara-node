@@ -132,6 +132,7 @@ export type TranslateOptions = {
     sourceHint?: string,
     adaptTo?: string[],
     instructions?: string[],
+    extras?: Record<string, any>,
     contentType?: string,
     multiline?: boolean,
     timeoutInMillis?: number,
@@ -161,7 +162,8 @@ export class Translator {
             content_type: options?.contentType, multiline: options?.multiline !== false,
             adapt_to: options?.adaptTo, instructions: options?.instructions,
             timeout: options?.timeoutInMillis, priority: options?.priority,
-            use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds
+            use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds,
+            extras: options?.extras
         });
     }
 

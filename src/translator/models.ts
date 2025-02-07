@@ -29,4 +29,5 @@ export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly sourceLanguage: string;
     readonly translation: T;
     readonly adaptedTo?: string[];
+    readonly extras?: Record<string, any>;
 }
