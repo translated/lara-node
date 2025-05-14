@@ -58,7 +58,5 @@ export class BrowserLaraClient extends LaraClient {
         throw new TypeError(
             `Invalid file input in the browser. Expected an instance of File but received ${typeof file}.`
         );
-
     }
-
 }

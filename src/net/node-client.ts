@@ -98,5 +98,4 @@ export class NodeLaraClient extends LaraClient {
             `Invalid file input in Node.js. Expected a Readable stream or a valid file path, but received ${typeof file}.`
         );
     }
-
 }

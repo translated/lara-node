@@ -1,8 +1,20 @@
 import {Credentials} from "../credentials";
 import createClient, {LaraClient} from "../net";
-import {Memory, MemoryImport, TextBlock, TextResult} from "./models";
+import createS3Client from "../net/s3";
+import {
+    Document,
+    DocumentDownloadOptions,
+    DocumentStatus,
+    DocumentUploadOptions,
+    Memory,
+    MemoryImport,
+    TextBlock,
+    TextResult
+} from "./models";
 import {LaraApiError, TimeoutError} from "../errors";
 import {MultiPartFile} from "../net/client";
+import {BrowserS3Client} from "../net/s3/browser-client";
+import {NodeS3Client} from "../net/s3/node-client";
 
 export type TranslatorOptions = {
     serverUrl?: string,
@@ -125,7 +137,6 @@ export class Memories {
 
         return mImport;
     }
-
 }
 
 export type TranslateOptions = {
@@ -140,14 +151,89 @@ export type TranslateOptions = {
     cacheTTLSeconds?: number,
 }
 
+export type DocumentTranslateOptions = DocumentUploadOptions & DocumentDownloadOptions;
+
+export type S3UploadFields = {
+    acl: string;
+    bucket: string;
+    key: string;
+}
+
+type UploadUrlData = {
+    url: string;
+    fields: S3UploadFields
+}
+
+export class Documents {
+    private readonly client: LaraClient;
+    private readonly s3Client: BrowserS3Client | NodeS3Client;
+    private readonly pollingInterval: number;
+
+    constructor(client: LaraClient) {
+        this.client = client;
+        this.s3Client = createS3Client();
+        this.pollingInterval = 2000;
+    }
+
+    public async upload(file: MultiPartFile, filename: string, source: string | null, target: string, options?: DocumentUploadOptions): Promise<Document> {
+        const {url, fields} = await this.client.get<UploadUrlData>(`/documents/upload-url`, {filename});
+
+        await this.s3Client.upload(url, fields, file);
+
+        return this.client.post<Document>('/documents', {
+            source,
+            target,
+            s3key: fields.key,
+            adapt_to: options?.adaptTo,
+        });
+    }
+
+    public async status(document: Document) {
+        return await this.client.get<Document>(`/documents/${document.id}`);
+    }
+
+    public async download(document: Document, options?: DocumentDownloadOptions) {
+        const { url } = await this.client.get<{url: string}>(`/documents/${document.id}/download-url`, {
+            output_format: options?.outputFormat,
+        });
+
+        return await this.s3Client.download(url);
+    }
+
+    public async translate(file: MultiPartFile, filename: string, source: string | null, target: string, options?: DocumentTranslateOptions) {
+        const uploadOptions = options?.adaptTo ? { adaptTo: options.adaptTo } : undefined;
+        const document = await this.upload(file, filename, source, target, uploadOptions);
+
+        const downloadOptions = options?.outputFormat ? { outputFormat: options.outputFormat } : undefined;
+
+        const maxWaitTime = 1000 * 60 * 15; // 15 minutes
+        const start = Date.now();
+
+        while (Date.now() - start < maxWaitTime) {
+            await new Promise(resolve => setTimeout(resolve, this.pollingInterval));
+
+            const { status } = await this.status(document);
+
+            if (status === DocumentStatus.TRANSLATED) return await this.download(document, downloadOptions);
+            if (status === DocumentStatus.ERROR) {
+                throw new Error("Error during translation");
+            }
+        }
+
+        throw new Error(`The translation process exceeded the maximum allowed time`);
+    }
+}
+
 export class Translator {
 
     protected readonly client: LaraClient;
     public readonly memories: Memories;
+    public readonly documents: Documents;
 
     constructor(credentials: Credentials, options?: TranslatorOptions) {
         this.client = createClient(credentials.accessKeyId, credentials.accessKeySecret, options?.serverUrl);
         this.memories = new Memories(this.client);
+        this.documents = new Documents(this.client);
     }
 
     async getLanguages(): Promise<string[]> {
@@ -164,5 +250,4 @@ export class Translator {
             use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds
         });
     }
-
 }

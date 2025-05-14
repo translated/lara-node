@@ -19,6 +19,40 @@ export interface MemoryImport {
     readonly progress: number;
 }
 
+export enum DocumentStatus {
+    INITIALIZED = "initialized",    // just been created
+    ANALYZING = "analyzing",        // being analyzed for language detection and chars count
+    PAUSED = "paused",              // paused after analysis, needs user confirm
+    READY = "ready",                // ready to be translated
+    TRANSLATING = "translating",
+    TRANSLATED = "translated",
+    ERROR = "error",
+}
+
+export type DocumentUploadOptions = {
+    adaptTo?: string[],
+}
+
+export type DocumentDownloadOptions = {
+    outputFormat?: string,
+}
+
+export interface DocumentOptions extends DocumentUploadOptions { }
+
+export interface Document {
+    readonly id: string;
+    readonly status: DocumentStatus;
+    readonly source?: string;
+    readonly target: string;
+    readonly filename: string;
+    readonly createdAt: Date;
+    readonly updatedAt: Date;
+    readonly options?: DocumentOptions;
+    readonly translatedChars?: number;
+    readonly totalChars?: number;
+    readonly errorReason?: string;
+}
+
 export interface TextBlock {
     readonly text: string;
     readonly translatable?: boolean;
