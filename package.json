@@ -33,12 +33,12 @@
   },
   "description": "Official Lara SDK for JavaScript and Node.js",
   "dependencies": {
-    "form-data": "^4.0.1"
+    "form-data": "^4.0.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.2",
-    "typescript": "^5.4.5",
-    "webpack": "^5.97.1",
+    "@types/node": "^22.15.18",
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.8",
     "webpack-cli": "^5.1.4"
   }
 }
