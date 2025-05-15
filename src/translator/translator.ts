@@ -167,12 +167,10 @@ type UploadUrlData = {
 export class Documents {
     private readonly client: LaraClient;
     private readonly s3Client: BrowserS3Client | NodeS3Client;
-    private readonly pollingInterval: number;
 
     constructor(client: LaraClient) {
         this.client = client;
         this.s3Client = createS3Client();
-        this.pollingInterval = 2000;
     }
 
     public async upload(file: MultiPartFile, filename: string, source: string | null, target: string, options?: DocumentUploadOptions): Promise<Document> {
@@ -188,12 +186,12 @@ export class Documents {
         });
     }
 
-    public async status(document: Document) {
-        return await this.client.get<Document>(`/documents/${document.id}`);
+    public async status(id: string) {
+        return await this.client.get<Document>(`/documents/${id}`);
     }
 
-    public async download(document: Document, options?: DocumentDownloadOptions) {
-        const { url } = await this.client.get<{url: string}>(`/documents/${document.id}/download-url`, {
+    public async download(id: string, options?: DocumentDownloadOptions) {
+        const { url } = await this.client.get<{url: string}>(`/documents/${id}/download-url`, {
             output_format: options?.outputFormat,
         });
 
@@ -202,25 +200,26 @@ export class Documents {
 
     public async translate(file: MultiPartFile, filename: string, source: string | null, target: string, options?: DocumentTranslateOptions) {
         const uploadOptions = options?.adaptTo ? { adaptTo: options.adaptTo } : undefined;
-        const document = await this.upload(file, filename, source, target, uploadOptions);
+        const { id } = await this.upload(file, filename, source, target, uploadOptions);
 
         const downloadOptions = options?.outputFormat ? { outputFormat: options.outputFormat } : undefined;
 
+        const pollingInterval = 2000;
         const maxWaitTime = 1000 * 60 * 15; // 15 minutes
         const start = Date.now();
 
         while (Date.now() - start < maxWaitTime) {
-            await new Promise(resolve => setTimeout(resolve, this.pollingInterval));
+            await new Promise(resolve => setTimeout(resolve, pollingInterval));
 
-            const { status } = await this.status(document);
+            const { status, errorReason } = await this.status(id);
 
-            if (status === DocumentStatus.TRANSLATED) return await this.download(document, downloadOptions);
+            if (status === DocumentStatus.TRANSLATED) return await this.download(id, downloadOptions);
             if (status === DocumentStatus.ERROR) {
-                throw new Error("Error during translation");
+                throw new LaraApiError(500, "DocumentError", errorReason as string);
             }
         }
 
-        throw new Error(`The translation process exceeded the maximum allowed time`);
+        throw new TimeoutError();
     }
 }
 
