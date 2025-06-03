@@ -173,7 +173,13 @@ export class Documents {
         this.s3Client = createS3Client();
     }
 
-    public async upload(file: MultiPartFile, filename: string, source: string | null, target: string, options?: DocumentUploadOptions): Promise<Document> {
+    public async upload(
+        file: MultiPartFile,
+        filename: string,
+        source: string | null,
+        target: string,
+        options?: DocumentUploadOptions
+    ): Promise<Document> {
         const {url, fields} = await this.client.get<UploadUrlData>(`/documents/upload-url`, {filename});
 
         await this.s3Client.upload(url, fields, file);
@@ -186,11 +192,11 @@ export class Documents {
         });
     }
 
-    public async status(id: string) {
+    public async status(id: string): Promise<Document> {
         return await this.client.get<Document>(`/documents/${id}`);
     }
 
-    public async download(id: string, options?: DocumentDownloadOptions) {
+    public async download(id: string, options?: DocumentDownloadOptions): Promise<Blob | Buffer> {
         const { url } = await this.client.get<{url: string}>(`/documents/${id}/download-url`, {
             output_format: options?.outputFormat,
         });
@@ -198,7 +204,13 @@ export class Documents {
         return await this.s3Client.download(url);
     }
 
-    public async translate(file: MultiPartFile, filename: string, source: string | null, target: string, options?: DocumentTranslateOptions) {
+    public async translate(
+        file: MultiPartFile,
+        filename: string,
+        source: string | null,
+        target: string,
+        options?: DocumentTranslateOptions
+    ): Promise<Blob | Buffer> {
         const uploadOptions = options?.adaptTo ? { adaptTo: options.adaptTo } : undefined;
         const { id } = await this.upload(file, filename, source, target, uploadOptions);
 
