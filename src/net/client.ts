@@ -66,33 +66,50 @@ export abstract class LaraClient {
         this.extraHeaders[name] = value;
     }
 
-    get<T>(path: string, params?: Record<string, any>): Promise<T> {
-        return this.request("GET", path, params);
+    get<T>(path: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<T> {
+        return this.request("GET", path, params, undefined, headers);
     }
 
-    delete<T>(path: string, params?: Record<string, any>): Promise<T> {
-        return this.request("DELETE", path, params);
+    delete<T>(path: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<T> {
+        return this.request("DELETE", path, params, undefined, headers);
     }
 
-    post<T>(path: string, body?: Record<string, any>, files?: Record<string, MultiPartFile>): Promise<T> {
-        return this.request("POST", path, body, files);
+    post<T>(
+        path: string,
+        body?: Record<string, any>,
+        files?: Record<string, MultiPartFile>,
+        headers?: Record<string, string>
+    ): Promise<T> {
+        return this.request("POST", path, body, files, headers);
     }
 
-    put<T>(path: string, body?: Record<string, any>, files?: Record<string, MultiPartFile>): Promise<T> {
-        return this.request("PUT", path, body, files);
+    put<T>(
+        path: string,
+        body?: Record<string, any>,
+        files?: Record<string, MultiPartFile>,
+        headers?: Record<string, string>
+    ): Promise<T> {
+        return this.request("PUT", path, body, files, headers);
     }
 
-    protected async request<T>(method: HttpMethod, path: string, body?: Record<string, any>, files?: Record<string, MultiPartFile>): Promise<T> {
+    protected async request<T>(
+        method: HttpMethod,
+        path: string,
+        body?: Record<string, any>,
+        files?: Record<string, MultiPartFile>,
+        headers?: Record<string, string>
+    ): Promise<T> {
         if (!path.startsWith("/"))
             path = "/" + path;
 
-        const headers: Record<string, string> = {
+        const _headers: Record<string, string> = {
             "X-HTTP-Method-Override": method,
             "X-Lara-Date": new Date().toUTCString(),
             "X-Lara-SDK-Name": "lara-node",
             'X-Lara-SDK-Version': SdkVersion,
-            ...this.extraHeaders
-        }
+            ...this.extraHeaders,
+            ...headers
+        };
 
         if (body) {
             body = Object.fromEntries(Object.entries(body).filter(
@@ -104,7 +121,7 @@ export abstract class LaraClient {
 
             if (body) {
                 const jsonBody = JSON.stringify(body, undefined, 0);
-                headers["Content-MD5"] = await this.crypto.digest(jsonBody);
+                _headers["Content-MD5"] = await this.crypto.digest(jsonBody);
             }
         }
 
@@ -114,17 +131,17 @@ export abstract class LaraClient {
             for (const [key, file] of Object.entries(files))
                 files[key] = this.wrapMultiPartFile(file);
 
-            headers["Content-Type"] = "multipart/form-data";
+            _headers["Content-Type"] = "multipart/form-data";
             requestBody = Object.assign({}, files, body);
         } else {
-            headers["Content-Type"] = "application/json";
+            _headers["Content-Type"] = "application/json";
             if (body) requestBody = body;
         }
 
-        const signature = await this.sign(method, path, headers);
-        headers["Authorization"] = `Lara ${this.accessKeyId}:${signature}`;
+        const signature = await this.sign(method, path, _headers);
+        _headers["Authorization"] = `Lara ${this.accessKeyId}:${signature}`;
 
-        const response: ClientResponse = await this.send(path, headers, requestBody);
+        const response: ClientResponse = await this.send(path, _headers, requestBody);
         if (200 <= response.statusCode && response.statusCode < 300) {
             return parseContent(response.body.content);
         } else {
