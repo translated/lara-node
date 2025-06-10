@@ -1,9 +1,9 @@
+import FormData from "form-data";
+import fs from "fs";
 import http from "http";
 import https from "https";
-import FormData from "form-data";
-import {BaseURL, ClientResponse, LaraClient, MultiPartFile} from "./client";
-import {Readable} from "stream";
-import fs from "fs";
+import { Readable } from "stream";
+import { BaseURL, ClientResponse, LaraClient, MultiPartFile } from "./client";
 
 /** @internal */
 export class NodeLaraClient extends LaraClient {
@@ -14,7 +14,7 @@ export class NodeLaraClient extends LaraClient {
     constructor(baseUrl: BaseURL, accessKeyId: string, accessKeySecret: string) {
         super(accessKeyId, accessKeySecret);
         this.baseUrl = baseUrl;
-        this.agent = baseUrl.secure ? new https.Agent({keepAlive: true}) : new http.Agent({keepAlive: true});
+        this.agent = baseUrl.secure ? new https.Agent({ keepAlive: true }) : new http.Agent({ keepAlive: true });
     }
 
     protected async send(path: string, headers: Record<string, string>, body?: Record<string, any>): Promise<ClientResponse> {
@@ -60,6 +60,15 @@ export class NodeLaraClient extends LaraClient {
 
                 res.on("end", () => {
                     let json;
+
+                    if (res.headers['content-type']?.includes('text/csv')) {
+                        return resolve({
+                            statusCode: res.statusCode!,
+                            body: {
+                                content: data
+                            }
+                        });
+                    }
 
                     try {
                         json = JSON.parse(data);

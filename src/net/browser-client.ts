@@ -1,4 +1,4 @@
-import {BaseURL, ClientResponse, LaraClient, MultiPartFile} from "./client";
+import { BaseURL, ClientResponse, LaraClient, MultiPartFile } from "./client";
 
 function hasDefaultPort(port: number, secure: boolean): boolean {
     return port === 80 && !secure || port === 443 && secure;
@@ -48,7 +48,16 @@ export class BrowserLaraClient extends LaraClient {
             body: requestBody
         });
 
-        return {statusCode: response.status, body: await response.json()};
+        if (response.headers.get("Content-Type")?.includes("text/csv")) {
+            return {
+                statusCode: response.status,
+                body: {
+                    content: await response.text()
+                }
+            };
+        }
+
+        return { statusCode: response.status, body: await response.json() };
     }
 
     protected wrapMultiPartFile(file: MultiPartFile): File {
