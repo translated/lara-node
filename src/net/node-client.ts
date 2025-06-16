@@ -73,7 +73,7 @@ export class NodeLaraClient extends LaraClient {
                     try {
                         json = JSON.parse(data);
                     } catch (e) {
-                        reject(new Error("Invalid JSON response"));
+                        reject(new SyntaxError("Invalid JSON response"));
                     }
 
                     resolve({
