@@ -149,6 +149,7 @@ export type TranslateOptions = {
     priority?: "normal" | "background",
     useCache?: boolean | "overwrite",
     cacheTTLSeconds?: number,
+    noTrace?: boolean,
 }
 
 export type DocumentTranslateOptions = DocumentUploadOptions & DocumentDownloadOptions;
@@ -184,12 +185,14 @@ export class Documents {
 
         await this.s3Client.upload(url, fields, file);
 
+        const headers: Record<string, string> = options?.noTrace ? { 'X-No-Trace': 'true' } : {};
+
         return this.client.post<Document>('/documents', {
             source,
             target,
             s3key: fields.key,
             adapt_to: options?.adaptTo,
-        });
+        }, undefined, headers);
     }
 
     public async status(id: string): Promise<Document> {
@@ -211,7 +214,11 @@ export class Documents {
         target: string,
         options?: DocumentTranslateOptions
     ): Promise<Blob | Buffer> {
-        const uploadOptions = options?.adaptTo ? { adaptTo: options.adaptTo } : undefined;
+        const uploadOptions: DocumentUploadOptions = {
+            adaptTo: options?.adaptTo,
+            noTrace: options?.noTrace
+        };
+
         const { id } = await this.upload(file, filename, source, target, uploadOptions);
 
         const downloadOptions = options?.outputFormat ? { outputFormat: options.outputFormat } : undefined;
@@ -253,12 +260,15 @@ export class Translator {
 
     async translate<T extends string | string[] | TextBlock[]>(text: T, source: string | null, target: string,
                                                                options?: TranslateOptions): Promise<TextResult<T>> {
+
+        const headers: Record<string, string> = options?.noTrace ? { 'X-No-Trace': 'true' } : {};
+
         return await this.client.post<TextResult<T>>("/translate", {
             q: text, source, target, source_hint: options?.sourceHint,
             content_type: options?.contentType, multiline: options?.multiline !== false,
             adapt_to: options?.adaptTo, instructions: options?.instructions,
             timeout: options?.timeoutInMillis, priority: options?.priority,
             use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds
-        });
+        }, undefined, headers);
     }
 }

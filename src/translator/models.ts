@@ -31,6 +31,7 @@ export enum DocumentStatus {
 
 export type DocumentUploadOptions = {
     adaptTo?: string[],
+    noTrace?: boolean,
 }
 
 export type DocumentDownloadOptions = {
