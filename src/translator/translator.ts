@@ -5,7 +5,7 @@ import {
     Document,
     DocumentDownloadOptions,
     DocumentStatus,
-    DocumentUploadOptions,
+    DocumentUploadOptions, Glossary, GlossaryCounts, GlossaryImport,
     Memory,
     MemoryImport,
     TextBlock,
@@ -143,6 +143,7 @@ export type TranslateOptions = {
     sourceHint?: string,
     adaptTo?: string[],
     instructions?: string[],
+    glossaries?: string[],
     contentType?: string,
     multiline?: boolean,
     timeoutInMillis?: number,
@@ -193,6 +194,7 @@ export class Documents {
             target,
             s3key: fields.key,
             adapt_to: options?.adaptTo,
+            glossaries: options?.glossaries,
         }, undefined, headers);
     }
 
@@ -217,6 +219,7 @@ export class Documents {
     ): Promise<Blob | Buffer> {
         const uploadOptions: DocumentUploadOptions = {
             adaptTo: options?.adaptTo,
+            glossaries: options?.glossaries,
             noTrace: options?.noTrace
         };
 
@@ -243,16 +246,96 @@ export class Documents {
     }
 }
 
+export type GlossaryImportCallback = (glossaryImport: GlossaryImport) => void;
+
+export class Glossaries {
+    private readonly client: LaraClient;
+    private readonly pollingInterval: number;
+
+    constructor(client: LaraClient) {
+        this.client = client;
+        this.pollingInterval = 2000;
+    }
+
+    async list(): Promise<Glossary[]> {
+        return await this.client.get<Glossary[]>('/glossaries');
+    }
+
+    async create(name: string): Promise<Glossary> {
+        return await this.client.post<Glossary>('/glossaries', { name });
+    }
+
+    async get(id: string): Promise<Glossary | null> {
+        try {
+            return await this.client.get<Glossary>(`/glossaries/${id}`);
+        } catch (e) {
+            if (e instanceof LaraApiError && e.statusCode === 404) {
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    async delete(id: string): Promise<Glossary> {
+        return await this.client.delete<Glossary>(`/glossaries/${id}`);
+    }
+
+    async update(id: string, name: string): Promise<Glossary> {
+        return await this.client.put<Glossary>(`/glossaries/${id}`, { name });
+    }
+
+    async importCsv(id: string, csv: MultiPartFile, gzip: boolean = false): Promise<GlossaryImport> {
+        return await this.client.post<GlossaryImport>(`/glossaries/${id}/import`, {
+            compression: gzip ? 'gzip' : undefined
+        }, {
+            csv
+        })
+    }
+
+    async getImportStatus(id: string): Promise<GlossaryImport> {
+        return await this.client.get<GlossaryImport>(`/glossaries/imports/${id}`);
+    }
+
+    async waitForImport(gImport: GlossaryImport, updateCallback?: GlossaryImportCallback, maxWaitTime?: number): Promise<GlossaryImport> {
+        const start = Date.now();
+        while (gImport.progress < 1.) {
+            if (maxWaitTime && Date.now() - start > maxWaitTime)
+                throw new TimeoutError();
+
+            await new Promise(resolve => setTimeout(resolve, this.pollingInterval));
+
+            gImport = await this.getImportStatus(gImport.id);
+            if (updateCallback)
+                updateCallback(gImport);
+        }
+
+        return gImport;
+    }
+
+    async counts(id: string): Promise<GlossaryCounts> {
+        return await this.client.get<GlossaryCounts>(`/glossaries/${id}/counts`);
+    }
+
+    async export(id: string, contentType: 'csv/table-uni', source?: string): Promise<string> {
+        return await this.client.get(`/glossaries/${id}/export`, {
+            content_type: contentType,
+            source
+        });
+    }
+}
+
 export class Translator {
 
     protected readonly client: LaraClient;
     public readonly memories: Memories;
     public readonly documents: Documents;
+    public readonly glossaries: Glossaries;
 
     constructor(credentials: Credentials, options?: TranslatorOptions) {
         this.client = createClient(credentials.accessKeyId, credentials.accessKeySecret, options?.serverUrl);
         this.memories = new Memories(this.client);
         this.documents = new Documents(this.client);
+        this.glossaries = new Glossaries(this.client);
     }
 
     async getLanguages(): Promise<string[]> {
@@ -267,7 +350,7 @@ export class Translator {
         return await this.client.post<TextResult<T>>("/translate", {
             q: text, source, target, source_hint: options?.sourceHint,
             content_type: options?.contentType, multiline: options?.multiline !== false,
-            adapt_to: options?.adaptTo, instructions: options?.instructions,
+            adapt_to: options?.adaptTo, glossaries: options?.glossaries, instructions: options?.instructions,
             timeout: options?.timeoutInMillis, priority: options?.priority,
             use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds,
             verbose: options?.verbose,

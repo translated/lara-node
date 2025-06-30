@@ -31,6 +31,7 @@ export enum DocumentStatus {
 
 export type DocumentUploadOptions = {
     adaptTo?: string[],
+    glossaries?: string[],
     noTrace?: boolean,
 }
 
@@ -64,4 +65,26 @@ export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly sourceLanguage: string;
     readonly translation: T;
     readonly adaptedTo?: string[];
+}
+
+export interface Glossary {
+    readonly id: string;
+    readonly name: string;
+    readonly ownerId: string;
+    readonly createdAt: Date;
+    readonly updatedAt: Date;
+}
+
+export interface GlossaryImport {
+    readonly id: string;
+    readonly begin: number;
+    readonly end: number;
+    readonly channel: number;
+    readonly size: number;
+    readonly progress: number;
+}
+
+export interface GlossaryCounts {
+    unidirectional?: Record<string, number>;
+    multidirectional?: number;
 }
