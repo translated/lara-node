@@ -150,6 +150,7 @@ export type TranslateOptions = {
     useCache?: boolean | "overwrite",
     cacheTTLSeconds?: number,
     noTrace?: boolean,
+    verbose?: boolean,
 }
 
 export type DocumentTranslateOptions = DocumentUploadOptions & DocumentDownloadOptions;
@@ -268,7 +269,8 @@ export class Translator {
             content_type: options?.contentType, multiline: options?.multiline !== false,
             adapt_to: options?.adaptTo, instructions: options?.instructions,
             timeout: options?.timeoutInMillis, priority: options?.priority,
-            use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds
+            use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds,
+            verbose: options?.verbose,
         }, undefined, headers);
     }
 }
