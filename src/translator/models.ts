@@ -60,11 +60,31 @@ export interface TextBlock {
     readonly translatable?: boolean;
 }
 
+export interface NGMemoryMatch {
+    memory: string;
+    tuid?: string;
+    source: string;
+    target: string;
+    sentence: string;
+    translation: string;
+    score: number;
+};
+
+export interface NGGlossaryMatch {
+    memory: string;
+    language: [string, string];
+    term: string;
+    translation: string;
+};
+
 export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly contentType: string;
     readonly sourceLanguage: string;
     readonly translation: T;
     readonly adaptedTo?: string[];
+    readonly glossaries?: string[];
+    readonly adaptedToMatches?: NGMemoryMatch[] | NGMemoryMatch[][];
+    readonly glossariesMatches?: NGGlossaryMatch[] | NGGlossaryMatch[][];
 }
 
 export interface Glossary {
