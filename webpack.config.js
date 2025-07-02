@@ -20,5 +20,12 @@ module.exports = {
             crypto: false,
             stream: false
         }
+    },
+    externals: {
+        "node:https": "commonjs https",
+        "node:http": "commonjs http",
+        "node:fs": "commonjs fs",
+        "node:crypto": "commonjs crypto",
+        "node:stream": "commonjs stream"
     }
 };
