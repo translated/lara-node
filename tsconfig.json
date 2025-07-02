@@ -10,12 +10,6 @@
     "skipLibCheck": true,
     "outDir": "lib/"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "lib",
-    "lib_browser",
-    "node_modules"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["lib", "lib_browser", "node_modules"]
 }

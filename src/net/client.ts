@@ -1,7 +1,7 @@
-import {version as SdkVersion} from "../sdk-version";
-import cryptoInstance, {PortableCrypto} from "../crypto";
-import {LaraApiError} from "../errors";
-import {Readable} from "node:stream";
+import type { Readable } from "node:stream";
+import cryptoInstance, { type PortableCrypto } from "../crypto";
+import { LaraApiError } from "../errors";
+import { version as SdkVersion } from "../sdk-version";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -10,30 +10,26 @@ export type BaseURL = {
     secure: boolean;
     hostname: string;
     port: number;
-}
+};
 
 /** @internal */
 export type ClientResponse = {
     statusCode: number;
     body: any;
-}
+};
 
 export type BrowserMultiPartFile = File;
 export type NodeMultiPartFile = Readable | string;
 export type MultiPartFile = BrowserMultiPartFile | NodeMultiPartFile;
 
 function parseContent(content: any): any {
-    if (content === undefined || content === null)
-        return content;
-    if (Array.isArray(content))
-        return content.map(parseContent);
+    if (content === undefined || content === null) return content;
+    if (Array.isArray(content)) return content.map(parseContent);
 
     if (typeof content === "string") {
         // Test if it's a date
-        if (content.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.[0-9]{3}Z$/))
-            return new Date(content);
-        else
-            return content;
+        if (content.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.[0-9]{3}Z$/)) return new Date(content);
+        else return content;
     }
 
     if (typeof content == "object") {
@@ -51,7 +47,6 @@ function parseContent(content: any): any {
 
 /** @internal */
 export abstract class LaraClient {
-
     private readonly crypto: PortableCrypto = cryptoInstance();
     private readonly accessKeyId: string;
     private readonly accessKeySecret: string;
@@ -99,25 +94,21 @@ export abstract class LaraClient {
         files?: Record<string, MultiPartFile>,
         headers?: Record<string, string>
     ): Promise<T> {
-        if (!path.startsWith("/"))
-            path = "/" + path;
+        if (!path.startsWith("/")) path = "/" + path;
 
         const _headers: Record<string, string> = {
             "X-HTTP-Method-Override": method,
             "X-Lara-Date": new Date().toUTCString(),
             "X-Lara-SDK-Name": "lara-node",
-            'X-Lara-SDK-Version': SdkVersion,
+            "X-Lara-SDK-Version": SdkVersion,
             ...this.extraHeaders,
             ...headers
         };
 
         if (body) {
-            body = Object.fromEntries(Object.entries(body).filter(
-                ([_, v]) => v !== undefined && v !== null
-            ));
+            body = Object.fromEntries(Object.entries(body).filter(([_, v]) => v !== undefined && v !== null));
 
-            if (Object.keys(body).length === 0)
-                body = undefined;
+            if (Object.keys(body).length === 0) body = undefined;
 
             if (body) {
                 const jsonBody = JSON.stringify(body, undefined, 0);
@@ -125,11 +116,10 @@ export abstract class LaraClient {
             }
         }
 
-        let requestBody: Record<string, any> | undefined = undefined;
+        let requestBody: Record<string, any> | undefined;
         if (files) {
             // validate files
-            for (const [key, file] of Object.entries(files))
-                files[key] = this.wrapMultiPartFile(file);
+            for (const [key, file] of Object.entries(files)) files[key] = this.wrapMultiPartFile(file);
 
             _headers["Content-Type"] = "multipart/form-data";
             requestBody = Object.assign({}, files, body);
@@ -145,7 +135,7 @@ export abstract class LaraClient {
         if (200 <= response.statusCode && response.statusCode < 300) {
             return parseContent(response.body.content);
         } else {
-            const error = response.body.error || {}
+            const error = response.body.error || {};
             throw new LaraApiError(
                 response.statusCode,
                 error.type || "UnknownError",
@@ -164,7 +154,11 @@ export abstract class LaraClient {
         return await this.crypto.hmac(this.accessKeySecret, challenge);
     }
 
-    protected abstract send(path: string, headers: Record<string, string>, body?: Record<string, any>): Promise<ClientResponse>;
+    protected abstract send(
+        path: string,
+        headers: Record<string, string>,
+        body?: Record<string, any>
+    ): Promise<ClientResponse>;
 
     protected abstract wrapMultiPartFile(file: MultiPartFile): any;
 }

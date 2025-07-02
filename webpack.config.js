@@ -1,5 +1,5 @@
-const path = require('path');
-const version = require('./package.json').version;
+const path = require("path");
+const version = require("./package.json").version;
 
 module.exports = {
     mode: "production",

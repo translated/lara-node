@@ -3,11 +3,10 @@ import fs from "fs";
 import http from "http";
 import https from "https";
 import { Readable } from "stream";
-import { BaseURL, ClientResponse, LaraClient, MultiPartFile } from "./client";
+import { type BaseURL, type ClientResponse, LaraClient, type MultiPartFile } from "./client";
 
 /** @internal */
 export class NodeLaraClient extends LaraClient {
-
     private readonly baseUrl: BaseURL;
     private readonly agent: http.Agent | https.Agent;
 
@@ -17,8 +16,12 @@ export class NodeLaraClient extends LaraClient {
         this.agent = baseUrl.secure ? new https.Agent({ keepAlive: true }) : new http.Agent({ keepAlive: true });
     }
 
-    protected async send(path: string, headers: Record<string, string>, body?: Record<string, any>): Promise<ClientResponse> {
-        let requestBody: string | FormData | undefined = undefined;
+    protected async send(
+        path: string,
+        headers: Record<string, string>,
+        body?: Record<string, any>
+    ): Promise<ClientResponse> {
+        let requestBody: string | FormData | undefined;
 
         if (body) {
             if (headers["Content-Type"] === "multipart/form-data") {
@@ -27,10 +30,8 @@ export class NodeLaraClient extends LaraClient {
                 for (const [key, value] of Object.entries(body!)) {
                     if (!value) continue;
 
-                    if (Array.isArray(value))
-                        value.forEach(v => formBody!.append(key, v));
-                    else
-                        formBody!.append(key, value);
+                    if (Array.isArray(value)) value.forEach((v) => formBody!.append(key, v));
+                    else formBody!.append(key, value);
                 }
 
                 headers = {
@@ -56,12 +57,12 @@ export class NodeLaraClient extends LaraClient {
 
             const req = (this.baseUrl.secure ? https : http).request(options, (res) => {
                 let data = "";
-                res.on("data", (chunk) => data += chunk);
+                res.on("data", (chunk) => (data += chunk));
 
                 res.on("end", () => {
                     let json;
 
-                    if (res.headers['content-type']?.includes('text/csv')) {
+                    if (res.headers["content-type"]?.includes("text/csv")) {
                         return resolve({
                             statusCode: res.statusCode!,
                             body: {
@@ -97,11 +98,9 @@ export class NodeLaraClient extends LaraClient {
     }
 
     protected wrapMultiPartFile(file: MultiPartFile): Readable {
-        if (typeof file === 'string')
-            file = fs.createReadStream(file);
+        if (typeof file === "string") file = fs.createReadStream(file);
 
-        if (file instanceof Readable)
-            return file;
+        if (file instanceof Readable) return file;
 
         throw new TypeError(
             `Invalid file input in Node.js. Expected a Readable stream or a valid file path, but received ${typeof file}.`

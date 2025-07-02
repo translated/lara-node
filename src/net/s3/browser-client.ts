@@ -1,6 +1,6 @@
-import {S3Client} from "./client";
-import {S3UploadFields} from "../../translator/translator";
-import {MultiPartFile} from "../client";
+import type { S3UploadFields } from "../../translator/translator";
+import type { MultiPartFile } from "../client";
+import { S3Client } from "./client";
 
 /** @internal */
 export class BrowserS3Client extends S3Client {
@@ -17,9 +17,9 @@ export class BrowserS3Client extends S3Client {
         formdata.append("file", file);
 
         await fetch(url, {
-            method: 'POST',
-            body: formdata,
-        })
+            method: "POST",
+            body: formdata
+        });
     }
 
     public async download(url: string) {
@@ -28,8 +28,7 @@ export class BrowserS3Client extends S3Client {
     }
 
     public wrapMultiPartFile(file: MultiPartFile): File {
-        if (file instanceof File)
-            return file;
+        if (file instanceof File) return file;
 
         throw new TypeError(
             `Invalid file input in the browser. Expected an instance of File but received ${typeof file}.`

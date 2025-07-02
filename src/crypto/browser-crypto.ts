@@ -1,8 +1,7 @@
-import {PortableCrypto} from "./portable-crypto";
+import type { PortableCrypto } from "./portable-crypto";
 
 /** @internal */
 export class BrowserCrypto implements PortableCrypto {
-
     private readonly subtle: SubtleCrypto;
 
     constructor() {
@@ -14,12 +13,9 @@ export class BrowserCrypto implements PortableCrypto {
      */
     async digest(data: string): Promise<string> {
         const encoder = new TextEncoder();
-        const buffer = (await this.subtle.digest(
-            "sha-256",
-            encoder.encode(data)
-        )).slice(0, 16);
+        const buffer = (await this.subtle.digest("sha-256", encoder.encode(data))).slice(0, 16);
 
-        return [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
+        return [...new Uint8Array(buffer)].map((x) => x.toString(16).padStart(2, "0")).join("");
     }
 
     async hmac(key: string, data: string): Promise<string> {
@@ -31,19 +27,14 @@ export class BrowserCrypto implements PortableCrypto {
             encoder.encode(key),
             {
                 name: "hmac",
-                hash: {name: "sha-256"},
+                hash: { name: "sha-256" }
             },
             false,
             ["sign"]
         );
 
-        const buffer = await this.subtle.sign(
-            "hmac",
-            cKey,
-            encoder.encode(data)
-        );
+        const buffer = await this.subtle.sign("hmac", cKey, encoder.encode(data));
 
         return btoa(String.fromCharCode(...new Uint8Array(buffer)));
     }
-
 }

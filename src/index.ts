@@ -1,6 +1,23 @@
-export {version} from "./sdk-version";
-export {Credentials} from "./credentials";
-export {LaraError, TimeoutError, LaraApiError} from "./errors";
-export {Translator, TranslatorOptions, Memories, MemoryImportCallback, TranslateOptions, Documents, DocumentTranslateOptions} from "./translator/translator";
-export {Memory, MemoryImport, TextBlock, TextResult, Document, DocumentStatus, DocumentUploadOptions, DocumentDownloadOptions} from "./translator/models";
-export {MultiPartFile} from "./net/client";
+export { Credentials } from "./credentials";
+export { LaraApiError, LaraError, TimeoutError } from "./errors";
+export { MultiPartFile } from "./net/client";
+export { version } from "./sdk-version";
+export {
+    Document,
+    DocumentDownloadOptions,
+    DocumentStatus,
+    DocumentUploadOptions,
+    Memory,
+    MemoryImport,
+    TextBlock,
+    TextResult
+} from "./translator/models";
+export {
+    Documents,
+    DocumentTranslateOptions,
+    Memories,
+    MemoryImportCallback,
+    TranslateOptions,
+    Translator,
+    TranslatorOptions
+} from "./translator/translator";

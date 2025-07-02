@@ -1,8 +1,8 @@
-import {BrowserLaraClient} from "./browser-client";
-import {NodeLaraClient} from "./node-client";
-import {BaseURL, LaraClient} from "./client";
+import { BrowserLaraClient } from "./browser-client";
+import type { BaseURL, LaraClient } from "./client";
+import { NodeLaraClient } from "./node-client";
 
-export {LaraClient} from "./client";
+export { LaraClient } from "./client";
 
 const DEFAULT_BASE_URL: string = "https://api.laratranslate.com";
 
@@ -18,8 +18,6 @@ export default function create(accessKeyId: string, accessKeySecret: string, bas
         port: url.port ? parseInt(url.port) : url.protocol === "https:" ? 443 : 80
     };
 
-    if (typeof window !== "undefined")
-        return new BrowserLaraClient(parsedURL, accessKeyId, accessKeySecret);
-    else
-        return new NodeLaraClient(parsedURL, accessKeyId, accessKeySecret);
+    if (typeof window !== "undefined") return new BrowserLaraClient(parsedURL, accessKeyId, accessKeySecret);
+    else return new NodeLaraClient(parsedURL, accessKeyId, accessKeySecret);
 }

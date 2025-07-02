@@ -1,29 +1,31 @@
-import {Credentials} from "../credentials";
-import createClient, {LaraClient} from "../net";
+import type { Credentials } from "../credentials";
+import { LaraApiError, TimeoutError } from "../errors";
+import createClient, { type LaraClient } from "../net";
+import type { MultiPartFile } from "../net/client";
 import createS3Client from "../net/s3";
+import type { BrowserS3Client } from "../net/s3/browser-client";
+import type { NodeS3Client } from "../net/s3/node-client";
 import {
-    Document,
-    DocumentDownloadOptions,
+    type Document,
+    type DocumentDownloadOptions,
     DocumentStatus,
-    DocumentUploadOptions, Glossary, GlossaryCounts, GlossaryImport,
-    Memory,
-    MemoryImport,
-    TextBlock,
-    TextResult
+    type DocumentUploadOptions,
+    type Glossary,
+    type GlossaryCounts,
+    type GlossaryImport,
+    type Memory,
+    type MemoryImport,
+    type TextBlock,
+    type TextResult
 } from "./models";
-import {LaraApiError, TimeoutError} from "../errors";
-import {MultiPartFile} from "../net/client";
-import {BrowserS3Client} from "../net/s3/browser-client";
-import {NodeS3Client} from "../net/s3/node-client";
 
 export type TranslatorOptions = {
-    serverUrl?: string,
-}
+    serverUrl?: string;
+};
 
 export type MemoryImportCallback = (memoryImport: MemoryImport) => void;
 
 export class Memories {
-
     private readonly client: LaraClient;
     private readonly pollingInterval: number;
 
@@ -38,7 +40,8 @@ export class Memories {
 
     async create(name: string, externalId?: string): Promise<Memory> {
         return await this.client.post<Memory>("/memories", {
-            name, external_id: externalId
+            name,
+            external_id: externalId
         });
     }
 
@@ -59,7 +62,7 @@ export class Memories {
     }
 
     async update(id: string, name: string): Promise<Memory> {
-        return await this.client.put<Memory>(`/memories/${id}`, {name});
+        return await this.client.put<Memory>(`/memories/${id}`, { name });
     }
 
     async connect<T extends string | string[]>(ids: T): Promise<T extends string ? Memory : Memory[]> {
@@ -71,15 +74,27 @@ export class Memories {
     }
 
     async importTmx(id: string, tmx: MultiPartFile, gzip: boolean = false): Promise<MemoryImport> {
-        return await this.client.post<MemoryImport>(`/memories/${id}/import`, {
-            compression: gzip ? 'gzip' : undefined
-        }, {
-            tmx
-        });
+        return await this.client.post<MemoryImport>(
+            `/memories/${id}/import`,
+            {
+                compression: gzip ? "gzip" : undefined
+            },
+            {
+                tmx
+            }
+        );
     }
 
-    async addTranslation(id: string | string[], source: string, target: string, sentence: string, translation: string,
-                         tuid?: string, sentenceBefore?: string, sentenceAfter?: string): Promise<MemoryImport> {
+    async addTranslation(
+        id: string | string[],
+        source: string,
+        target: string,
+        sentence: string,
+        translation: string,
+        tuid?: string,
+        sentenceBefore?: string,
+        sentenceAfter?: string
+    ): Promise<MemoryImport> {
         const body: Record<string, any> = {
             source,
             target,
@@ -98,8 +113,16 @@ export class Memories {
         }
     }
 
-    async deleteTranslation(id: string | string[], source: string, target: string, sentence: string, translation: string,
-                            tuid?: string, sentenceBefore?: string, sentenceAfter?: string): Promise<MemoryImport> {
+    async deleteTranslation(
+        id: string | string[],
+        source: string,
+        target: string,
+        sentence: string,
+        translation: string,
+        tuid?: string,
+        sentenceBefore?: string,
+        sentenceAfter?: string
+    ): Promise<MemoryImport> {
         const body: Record<string, any> = {
             source,
             target,
@@ -122,17 +145,19 @@ export class Memories {
         return await this.client.get<MemoryImport>(`/memories/imports/${id}`);
     }
 
-    async waitForImport(mImport: MemoryImport, updateCallback?: MemoryImportCallback, maxWaitTime?: number): Promise<MemoryImport> {
+    async waitForImport(
+        mImport: MemoryImport,
+        updateCallback?: MemoryImportCallback,
+        maxWaitTime?: number
+    ): Promise<MemoryImport> {
         const start = Date.now();
-        while (mImport.progress < 1.) {
-            if (maxWaitTime && Date.now() - start > maxWaitTime)
-                throw new TimeoutError();
+        while (mImport.progress < 1.0) {
+            if (maxWaitTime && Date.now() - start > maxWaitTime) throw new TimeoutError();
 
-            await new Promise(resolve => setTimeout(resolve, this.pollingInterval));
+            await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
 
             mImport = await this.getImportStatus(mImport.id);
-            if (updateCallback)
-                updateCallback(mImport);
+            if (updateCallback) updateCallback(mImport);
         }
 
         return mImport;
@@ -140,19 +165,19 @@ export class Memories {
 }
 
 export type TranslateOptions = {
-    sourceHint?: string,
-    adaptTo?: string[],
-    instructions?: string[],
-    glossaries?: string[],
-    contentType?: string,
-    multiline?: boolean,
-    timeoutInMillis?: number,
-    priority?: "normal" | "background",
-    useCache?: boolean | "overwrite",
-    cacheTTLSeconds?: number,
-    noTrace?: boolean,
-    verbose?: boolean,
-}
+    sourceHint?: string;
+    adaptTo?: string[];
+    instructions?: string[];
+    glossaries?: string[];
+    contentType?: string;
+    multiline?: boolean;
+    timeoutInMillis?: number;
+    priority?: "normal" | "background";
+    useCache?: boolean | "overwrite";
+    cacheTTLSeconds?: number;
+    noTrace?: boolean;
+    verbose?: boolean;
+};
 
 export type DocumentTranslateOptions = DocumentUploadOptions & DocumentDownloadOptions;
 
@@ -160,12 +185,12 @@ export type S3UploadFields = {
     acl: string;
     bucket: string;
     key: string;
-}
+};
 
 type UploadUrlData = {
     url: string;
-    fields: S3UploadFields
-}
+    fields: S3UploadFields;
+};
 
 export class Documents {
     private readonly client: LaraClient;
@@ -183,19 +208,24 @@ export class Documents {
         target: string,
         options?: DocumentUploadOptions
     ): Promise<Document> {
-        const {url, fields} = await this.client.get<UploadUrlData>(`/documents/upload-url`, {filename});
+        const { url, fields } = await this.client.get<UploadUrlData>(`/documents/upload-url`, { filename });
 
         await this.s3Client.upload(url, fields, file);
 
-        const headers: Record<string, string> = options?.noTrace ? { 'X-No-Trace': 'true' } : {};
+        const headers: Record<string, string> = options?.noTrace ? { "X-No-Trace": "true" } : {};
 
-        return this.client.post<Document>('/documents', {
-            source,
-            target,
-            s3key: fields.key,
-            adapt_to: options?.adaptTo,
-            glossaries: options?.glossaries,
-        }, undefined, headers);
+        return this.client.post<Document>(
+            "/documents",
+            {
+                source,
+                target,
+                s3key: fields.key,
+                adapt_to: options?.adaptTo,
+                glossaries: options?.glossaries
+            },
+            undefined,
+            headers
+        );
     }
 
     public async status(id: string): Promise<Document> {
@@ -203,8 +233,8 @@ export class Documents {
     }
 
     public async download(id: string, options?: DocumentDownloadOptions): Promise<Blob | Buffer> {
-        const { url } = await this.client.get<{url: string}>(`/documents/${id}/download-url`, {
-            output_format: options?.outputFormat,
+        const { url } = await this.client.get<{ url: string }>(`/documents/${id}/download-url`, {
+            output_format: options?.outputFormat
         });
 
         return await this.s3Client.download(url);
@@ -232,7 +262,7 @@ export class Documents {
         const start = Date.now();
 
         while (Date.now() - start < maxWaitTime) {
-            await new Promise(resolve => setTimeout(resolve, pollingInterval));
+            await new Promise((resolve) => setTimeout(resolve, pollingInterval));
 
             const { status, errorReason } = await this.status(id);
 
@@ -258,11 +288,11 @@ export class Glossaries {
     }
 
     async list(): Promise<Glossary[]> {
-        return await this.client.get<Glossary[]>('/glossaries');
+        return await this.client.get<Glossary[]>("/glossaries");
     }
 
     async create(name: string): Promise<Glossary> {
-        return await this.client.post<Glossary>('/glossaries', { name });
+        return await this.client.post<Glossary>("/glossaries", { name });
     }
 
     async get(id: string): Promise<Glossary | null> {
@@ -285,28 +315,34 @@ export class Glossaries {
     }
 
     async importCsv(id: string, csv: MultiPartFile, gzip: boolean = false): Promise<GlossaryImport> {
-        return await this.client.post<GlossaryImport>(`/glossaries/${id}/import`, {
-            compression: gzip ? 'gzip' : undefined
-        }, {
-            csv
-        })
+        return await this.client.post<GlossaryImport>(
+            `/glossaries/${id}/import`,
+            {
+                compression: gzip ? "gzip" : undefined
+            },
+            {
+                csv
+            }
+        );
     }
 
     async getImportStatus(id: string): Promise<GlossaryImport> {
         return await this.client.get<GlossaryImport>(`/glossaries/imports/${id}`);
     }
 
-    async waitForImport(gImport: GlossaryImport, updateCallback?: GlossaryImportCallback, maxWaitTime?: number): Promise<GlossaryImport> {
+    async waitForImport(
+        gImport: GlossaryImport,
+        updateCallback?: GlossaryImportCallback,
+        maxWaitTime?: number
+    ): Promise<GlossaryImport> {
         const start = Date.now();
-        while (gImport.progress < 1.) {
-            if (maxWaitTime && Date.now() - start > maxWaitTime)
-                throw new TimeoutError();
+        while (gImport.progress < 1.0) {
+            if (maxWaitTime && Date.now() - start > maxWaitTime) throw new TimeoutError();
 
-            await new Promise(resolve => setTimeout(resolve, this.pollingInterval));
+            await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
 
             gImport = await this.getImportStatus(gImport.id);
-            if (updateCallback)
-                updateCallback(gImport);
+            if (updateCallback) updateCallback(gImport);
         }
 
         return gImport;
@@ -316,7 +352,7 @@ export class Glossaries {
         return await this.client.get<GlossaryCounts>(`/glossaries/${id}/counts`);
     }
 
-    async export(id: string, contentType: 'csv/table-uni', source?: string): Promise<string> {
+    async export(id: string, contentType: "csv/table-uni", source?: string): Promise<string> {
         return await this.client.get(`/glossaries/${id}/export`, {
             content_type: contentType,
             source
@@ -325,7 +361,6 @@ export class Glossaries {
 }
 
 export class Translator {
-
     protected readonly client: LaraClient;
     public readonly memories: Memories;
     public readonly documents: Documents;
@@ -342,18 +377,34 @@ export class Translator {
         return await this.client.get<string[]>("/languages");
     }
 
-    async translate<T extends string | string[] | TextBlock[]>(text: T, source: string | null, target: string,
-                                                               options?: TranslateOptions): Promise<TextResult<T>> {
+    async translate<T extends string | string[] | TextBlock[]>(
+        text: T,
+        source: string | null,
+        target: string,
+        options?: TranslateOptions
+    ): Promise<TextResult<T>> {
+        const headers: Record<string, string> = options?.noTrace ? { "X-No-Trace": "true" } : {};
 
-        const headers: Record<string, string> = options?.noTrace ? { 'X-No-Trace': 'true' } : {};
-
-        return await this.client.post<TextResult<T>>("/translate", {
-            q: text, source, target, source_hint: options?.sourceHint,
-            content_type: options?.contentType, multiline: options?.multiline !== false,
-            adapt_to: options?.adaptTo, glossaries: options?.glossaries, instructions: options?.instructions,
-            timeout: options?.timeoutInMillis, priority: options?.priority,
-            use_cache: options?.useCache, cache_ttl: options?.cacheTTLSeconds,
-            verbose: options?.verbose,
-        }, undefined, headers);
+        return await this.client.post<TextResult<T>>(
+            "/translate",
+            {
+                q: text,
+                source,
+                target,
+                source_hint: options?.sourceHint,
+                content_type: options?.contentType,
+                multiline: options?.multiline !== false,
+                adapt_to: options?.adaptTo,
+                glossaries: options?.glossaries,
+                instructions: options?.instructions,
+                timeout: options?.timeoutInMillis,
+                priority: options?.priority,
+                use_cache: options?.useCache,
+                cache_ttl: options?.cacheTTLSeconds,
+                verbose: options?.verbose
+            },
+            undefined,
+            headers
+        );
     }
 }

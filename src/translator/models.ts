@@ -19,6 +19,7 @@ export interface MemoryImport {
     readonly progress: number;
 }
 
+// biome-ignore format: keep comments aligned
 export enum DocumentStatus {
     INITIALIZED = "initialized",    // just been created
     ANALYZING = "analyzing",        // being analyzed for language detection and chars count
@@ -26,20 +27,20 @@ export enum DocumentStatus {
     READY = "ready",                // ready to be translated
     TRANSLATING = "translating",
     TRANSLATED = "translated",
-    ERROR = "error",
+    ERROR = "error"
 }
 
 export type DocumentUploadOptions = {
-    adaptTo?: string[],
-    glossaries?: string[],
-    noTrace?: boolean,
-}
+    adaptTo?: string[];
+    glossaries?: string[];
+    noTrace?: boolean;
+};
 
 export type DocumentDownloadOptions = {
-    outputFormat?: string,
-}
+    outputFormat?: string;
+};
 
-export interface DocumentOptions extends DocumentUploadOptions { }
+export interface DocumentOptions extends DocumentUploadOptions {}
 
 export interface Document {
     readonly id: string;
@@ -68,14 +69,14 @@ export interface NGMemoryMatch {
     sentence: string;
     translation: string;
     score: number;
-};
+}
 
 export interface NGGlossaryMatch {
     memory: string;
     language: [string, string];
     term: string;
     translation: string;
-};
+}
 
 export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly contentType: string;
