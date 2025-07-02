@@ -9,6 +9,8 @@ export {
     DocumentUploadOptions,
     Memory,
     MemoryImport,
+    NGGlossaryMatch,
+    NGMemoryMatch,
     TextBlock,
     TextResult
 } from "./translator/models";
