@@ -32,7 +32,7 @@ function parseContent(content: any): any {
         else return content;
     }
 
-    if (typeof content == "object") {
+    if (typeof content === "object") {
         const result: Record<string, any> = {};
         for (const [key, value] of Object.entries(content)) {
             const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
@@ -94,7 +94,7 @@ export abstract class LaraClient {
         files?: Record<string, MultiPartFile>,
         headers?: Record<string, string>
     ): Promise<T> {
-        if (!path.startsWith("/")) path = "/" + path;
+        if (!path.startsWith("/")) path = `/${path}`;
 
         const _headers: Record<string, string> = {
             "X-HTTP-Method-Override": method,
@@ -129,7 +129,7 @@ export abstract class LaraClient {
         }
 
         const signature = await this.sign(method, path, _headers);
-        _headers["Authorization"] = `Lara ${this.accessKeyId}:${signature}`;
+        _headers.Authorization = `Lara ${this.accessKeyId}:${signature}`;
 
         const response: ClientResponse = await this.send(path, _headers, requestBody);
         if (200 <= response.statusCode && response.statusCode < 300) {

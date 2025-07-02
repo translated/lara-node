@@ -1,8 +1,8 @@
+import fs from "node:fs";
+import http from "node:http";
+import https from "node:https";
+import { Readable } from "node:stream";
 import FormData from "form-data";
-import fs from "fs";
-import http from "http";
-import https from "https";
-import { Readable } from "stream";
 import { type BaseURL, type ClientResponse, LaraClient, type MultiPartFile } from "./client";
 
 /** @internal */
@@ -73,7 +73,7 @@ export class NodeLaraClient extends LaraClient {
 
                     try {
                         json = JSON.parse(data);
-                    } catch (e) {
+                    } catch (_e) {
                         reject(new SyntaxError("Invalid JSON response"));
                     }
 

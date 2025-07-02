@@ -1,7 +1,7 @@
+import fs from "node:fs";
+import https from "node:https";
+import { Readable } from "node:stream";
 import FormData from "form-data";
-import fs from "fs";
-import https from "https";
-import { Readable } from "stream";
 import type { S3UploadFields } from "../../translator/translator";
 import type { MultiPartFile } from "../client";
 import { S3Client } from "./client";

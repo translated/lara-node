@@ -1,11 +1,11 @@
-const path = require("path");
+const path = require("node:path");
 const version = require("./package.json").version;
 
 module.exports = {
     mode: "production",
     entry: "./lib/index.js",
     output: {
-        filename: "lara-" + version + ".min.js",
+        filename: `lara-${version}.min.js`,
         path: path.resolve(__dirname, "lib_browser"),
         library: {
             name: "Lara",

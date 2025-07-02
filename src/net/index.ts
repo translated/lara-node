@@ -10,7 +10,7 @@ export default function create(accessKeyId: string, accessKeySecret: string, bas
     const url = new URL(baseUrl || DEFAULT_BASE_URL);
 
     if (url.protocol !== "https:" && url.protocol !== "http:")
-        throw new TypeError("Invalid URL (protocol): " + url.protocol);
+        throw new TypeError(`Invalid URL (protocol): ${url.protocol}`);
 
     const parsedURL: BaseURL = {
         secure: url.protocol === "https:",

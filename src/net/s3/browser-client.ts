@@ -4,10 +4,6 @@ import { S3Client } from "./client";
 
 /** @internal */
 export class BrowserS3Client extends S3Client {
-    constructor() {
-        super();
-    }
-
     public async _upload(url: string, fields: S3UploadFields, file: File) {
         const formdata = new FormData();
 
