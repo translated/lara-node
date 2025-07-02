@@ -57,10 +57,12 @@ export class NodeLaraClient extends LaraClient {
 
             const req = (this.baseUrl.secure ? https : http).request(options, (res) => {
                 let data = "";
+
+                // biome-ignore lint/suspicious/noAssignInExpressions: store response data
                 res.on("data", (chunk) => (data += chunk));
 
                 res.on("end", () => {
-                    let json;
+                    let json: any;
 
                     if (res.headers["content-type"]?.includes("text/csv")) {
                         return resolve({
