@@ -8,7 +8,9 @@
   },
   "scripts": {
     "build": "rm -rf lib/* lib-browser/* && node scripts/generate-sdk-version.js && tsc && webpack",
-    "version": "node scripts/generate-sdk-version.js && git add src/sdk-version.ts"
+    "version": "node scripts/generate-sdk-version.js && git add src/sdk-version.ts",
+    "biome:check": "biome check",
+    "biome:write": "biome check --write"
   },
   "files": [
     "lib",
@@ -36,6 +38,7 @@
     "form-data": "^4.0.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.0.6",
     "@types/node": "^22.15.18",
     "typescript": "^5.8.3",
     "webpack": "^5.99.8",
