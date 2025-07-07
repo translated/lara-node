@@ -64,15 +64,14 @@ export interface TextBlock {
 export interface NGMemoryMatch {
     memory: string;
     tuid?: string;
-    source: string;
-    target: string;
+    language: [string, string];
     sentence: string;
     translation: string;
     score: number;
 }
 
 export interface NGGlossaryMatch {
-    memory: string;
+    glossary: string;
     language: [string, string];
     term: string;
     translation: string;
