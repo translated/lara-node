@@ -16,7 +16,8 @@ import {
     type Memory,
     type MemoryImport,
     type TextBlock,
-    type TextResult
+    type TextResult,
+    TranslationStyle
 } from "./models";
 
 export type TranslatorOptions = {
@@ -177,6 +178,7 @@ export type TranslateOptions = {
     cacheTTLSeconds?: number;
     noTrace?: boolean;
     verbose?: boolean;
+    style?: TranslationStyle;
 };
 
 export type DocumentTranslateOptions = DocumentUploadOptions & DocumentDownloadOptions;
@@ -221,7 +223,8 @@ export class Documents {
                 target,
                 s3key: fields.key,
                 adapt_to: options?.adaptTo,
-                glossaries: options?.glossaries
+                glossaries: options?.glossaries,
+                style: options?.style
             },
             undefined,
             headers
@@ -250,7 +253,8 @@ export class Documents {
         const uploadOptions: DocumentUploadOptions = {
             adaptTo: options?.adaptTo,
             glossaries: options?.glossaries,
-            noTrace: options?.noTrace
+            noTrace: options?.noTrace,
+            style: options?.style
         };
 
         const { id } = await this.upload(file, filename, source, target, uploadOptions);
@@ -401,7 +405,8 @@ export class Translator {
                 priority: options?.priority,
                 use_cache: options?.useCache,
                 cache_ttl: options?.cacheTTLSeconds,
-                verbose: options?.verbose
+                verbose: options?.verbose,
+                style: options?.style
             },
             undefined,
             headers

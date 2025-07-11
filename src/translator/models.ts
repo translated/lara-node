@@ -34,6 +34,7 @@ export type DocumentUploadOptions = {
     adaptTo?: string[];
     glossaries?: string[];
     noTrace?: boolean;
+    style?: TranslationStyle;
 };
 
 export type DocumentDownloadOptions = {
@@ -108,3 +109,5 @@ export interface GlossaryCounts {
     unidirectional?: Record<string, number>;
     multidirectional?: number;
 }
+
+export type TranslationStyle = "faithful" | "fluid" | "creative";
