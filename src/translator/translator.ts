@@ -178,6 +178,7 @@ export type TranslateOptions = {
     cacheTTLSeconds?: number;
     noTrace?: boolean;
     verbose?: boolean;
+    headers?: Record<string, string>;
     style?: TranslationStyle;
 };
 
@@ -387,7 +388,17 @@ export class Translator {
         target: string,
         options?: TranslateOptions
     ): Promise<TextResult<T>> {
-        const headers: Record<string, string> = options?.noTrace ? { "X-No-Trace": "true" } : {};
+        const headers: Record<string, string> = {};
+
+        if (options?.headers) {
+            for (const [name, value] of Object.entries(options.headers)) {
+                headers[name] = value;
+            }
+        }
+
+        if (options?.noTrace) {
+            headers["X-No-Trace"] = "true";
+        }
 
         return await this.client.post<TextResult<T>>(
             "/translate",
