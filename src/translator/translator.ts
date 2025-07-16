@@ -17,7 +17,7 @@ import {
     type MemoryImport,
     type TextBlock,
     type TextResult,
-    TranslationStyle
+    type TranslationStyle
 } from "./models";
 
 export type TranslatorOptions = {
