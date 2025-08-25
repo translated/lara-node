@@ -32,8 +32,11 @@ export class BrowserLaraClient extends LaraClient {
                 for (const [key, value] of Object.entries(body!)) {
                     if (!value) continue;
 
-                    if (Array.isArray(value)) value.forEach((v) => formBody!.append(key, v));
-                    else formBody!.append(key, value);
+                    if (Array.isArray(value)) {
+                        for (const v of value) formBody!.append(key, v);
+                    } else {
+                        formBody!.append(key, value);
+                    }
                 }
 
                 requestBody = formBody;

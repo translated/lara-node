@@ -15,7 +15,7 @@ export default function create(accessKeyId: string, accessKeySecret: string, bas
     const parsedURL: BaseURL = {
         secure: url.protocol === "https:",
         hostname: url.hostname,
-        port: url.port ? parseInt(url.port) : url.protocol === "https:" ? 443 : 80
+        port: url.port ? parseInt(url.port, 10) : url.protocol === "https:" ? 443 : 80
     };
 
     if (typeof window !== "undefined") return new BrowserLaraClient(parsedURL, accessKeyId, accessKeySecret);
