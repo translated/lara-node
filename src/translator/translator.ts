@@ -94,7 +94,8 @@ export class Memories {
         translation: string,
         tuid?: string,
         sentenceBefore?: string,
-        sentenceAfter?: string
+        sentenceAfter?: string,
+        headers?: Record<string, string>
     ): Promise<MemoryImport> {
         const body: Record<string, any> = {
             source,
@@ -108,9 +109,9 @@ export class Memories {
 
         if (Array.isArray(id)) {
             body.ids = id;
-            return await this.client.put<MemoryImport>("/memories/content", body);
+            return await this.client.put<MemoryImport>("/memories/content", body, undefined, headers);
         } else {
-            return await this.client.put<MemoryImport>(`/memories/${id}/content`, body);
+            return await this.client.put<MemoryImport>(`/memories/${id}/content`, body, undefined, headers);
         }
     }
 
