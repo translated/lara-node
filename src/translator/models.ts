@@ -30,7 +30,12 @@ export enum DocumentStatus {
     ERROR = "error"
 }
 
-export type DocumentUploadOptions = {
+export interface DocxExtractionParams {
+    extractComments?: boolean;
+    acceptRevisions?: boolean;
+}
+
+export type DocumentOptions = {
     adaptTo?: string[];
     glossaries?: string[];
     noTrace?: boolean;
@@ -41,7 +46,10 @@ export type DocumentDownloadOptions = {
     outputFormat?: string;
 };
 
-export interface DocumentOptions extends DocumentUploadOptions {}
+export type DocumentUploadOptions = DocumentOptions & {
+    password?: string;
+    extractionParams?: DocxExtractionParams;
+};
 
 export interface Document {
     readonly id: string;

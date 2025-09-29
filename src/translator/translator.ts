@@ -19,6 +19,7 @@ import {
     type TextResult,
     type TranslationStyle
 } from "./models";
+import toSnakeCase from "../utils/toSnakeCase";
 
 export type TranslatorOptions = {
     serverUrl?: string;
@@ -226,7 +227,9 @@ export class Documents {
                 s3key: fields.key,
                 adapt_to: options?.adaptTo,
                 glossaries: options?.glossaries,
-                style: options?.style
+                style: options?.style,
+                password: options?.password,
+                extraction_params: options?.extractionParams ? toSnakeCase(options.extractionParams) : undefined
             },
             undefined,
             headers
@@ -256,7 +259,9 @@ export class Documents {
             adaptTo: options?.adaptTo,
             glossaries: options?.glossaries,
             noTrace: options?.noTrace,
-            style: options?.style
+            style: options?.style,
+            password: options?.password,
+            extractionParams: options?.extractionParams
         };
 
         const { id } = await this.upload(file, filename, source, target, uploadOptions);
