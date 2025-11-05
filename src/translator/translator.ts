@@ -120,8 +120,8 @@ export class Memories {
         id: string | string[],
         source: string,
         target: string,
-        sentence: string,
-        translation: string,
+        sentence?: string,
+        translation?: string,
         tuid?: string,
         sentenceBefore?: string,
         sentenceAfter?: string
