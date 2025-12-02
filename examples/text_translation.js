@@ -93,6 +93,18 @@ async function main() {
         const languages = await lara.getLanguages();
         console.log("Supported languages: [" + languages +"]");
 
+        // Example 8: Detect language of a given text
+        console.log("=== Language Detection ===");
+        const detectionResult1 = await lara.detect("¿Cómo estás?");
+        console.log("Text: ¿Cómo estás?");
+        console.log("Detected Language: " + detectionResult1.language + " with content type " + detectionResult1.contentType + "\n");
+
+        // Example 9: Detect language with hint and passlist
+        console.log("=== Language Detection with Hint and Passlist ===");
+        const detectionResult2 = await lara.detect("Ciao", "it", ["it", "fr"]);
+        console.log("Text: Ciao");
+        console.log("Detected Language: " + detectionResult2.language + " with content type " + detectionResult2.contentType + "\n");
+
     } catch (error) {
         console.error("Error:", error.message);
     }

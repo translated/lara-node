@@ -5,7 +5,9 @@ import type { MultiPartFile } from "../net/client";
 import createS3Client from "../net/s3";
 import type { BrowserS3Client } from "../net/s3/browser-client";
 import type { NodeS3Client } from "../net/s3/node-client";
+import toSnakeCase from "../utils/toSnakeCase";
 import {
+    type DetectResult,
     type Document,
     type DocumentDownloadOptions,
     DocumentStatus,
@@ -19,7 +21,6 @@ import {
     type TextResult,
     type TranslationStyle
 } from "./models";
-import toSnakeCase from "../utils/toSnakeCase";
 
 export type TranslatorOptions = {
     serverUrl?: string;
@@ -428,5 +429,13 @@ export class Translator {
             undefined,
             headers
         );
+    }
+
+    async detect(text: string | string[], hint?: string, passlist?: string[]): Promise<DetectResult> {
+        return await this.client.post<DetectResult>("/detect", {
+            q: text,
+            hint,
+            passlist
+        });
     }
 }

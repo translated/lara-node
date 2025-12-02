@@ -96,6 +96,11 @@ export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly glossariesMatches?: NGGlossaryMatch[] | NGGlossaryMatch[][];
 }
 
+export interface DetectResult {
+    language: string;
+    contentType: string;
+}
+
 export interface Glossary {
     readonly id: string;
     readonly name: string;

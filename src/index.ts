@@ -12,7 +12,8 @@ export {
     NGGlossaryMatch,
     NGMemoryMatch,
     TextBlock,
-    TextResult
+    TextResult,
+    DetectResult
 } from "./translator/models";
 export {
     Documents,

@@ -181,6 +181,32 @@ const options = {
 const result = await lara.translate("Hello", "en-US", "fr-FR", options);
 ```
 
+#### Language Detection
+
+Use detect() to automatically identify the language of one or multiple texts.
+
+```javascript
+// Single string detection
+const single = await lara.detect("Bonjour tout le monde");
+console.log(single.language); // fr
+
+// Multiple strings detection
+const multiple = await lara.detect(["Hello world", "How are you?"]);
+console.log(multiple.languages); // "en"
+```
+
+You can provide a hint (expected source language) and a passlist (restrict candidates) to improve accuracy.
+
+```javascript
+// Detection with hint and passlist
+const detected = await lara.detect(
+  "Es un día soleado",
+  "es",                      // hint (optional)
+  ["es", "pt", "fr"]         // passlist (optional)
+);
+console.log(detected.language); // es
+```
+
 ### 📖 Document Translation
 #### Simple document translation
 
