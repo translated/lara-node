@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const packageJsonFile = path.resolve(__dirname, "..", "package.json");
-const apiVersionFile = path.resolve(__dirname, "..", "src", "sdk-version.ts");
+const apiVersionFile = path.resolve(__dirname, "..", "src", "utils", "sdk-version.ts");
 
 const packageJson = JSON.parse(fs.readFileSync(packageJsonFile, "utf8"));
 

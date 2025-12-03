@@ -1,4 +1,4 @@
-import type { S3UploadFields } from "../../translator/translator";
+import type { S3UploadFields } from "../../documents";
 import type { MultiPartFile } from "../client";
 import { S3Client } from "./client";
 

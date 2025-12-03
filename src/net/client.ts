@@ -1,7 +1,7 @@
 import type { Readable } from "node:stream";
 import cryptoInstance, { type PortableCrypto } from "../crypto";
 import { LaraApiError } from "../errors";
-import { version as SdkVersion } from "../sdk-version";
+import { version as SdkVersion } from "../utils/sdk-version";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 

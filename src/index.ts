@@ -1,26 +1,33 @@
 export { Credentials } from "./credentials";
 export { LaraApiError, LaraError, TimeoutError } from "./errors";
 export { MultiPartFile } from "./net/client";
-export { version } from "./sdk-version";
+export { version } from "./utils/sdk-version";
 export {
     Document,
     DocumentDownloadOptions,
     DocumentStatus,
     DocumentUploadOptions,
+    DocumentTranslateOptions,
+    Documents
+} from "./documents";
+export {
     Memory,
     MemoryImport,
-    NGGlossaryMatch,
-    NGMemoryMatch,
+    MemoryImportCallback,
+    Memories
+} from "./memories";
+export {
+    GlossaryImport,
+    GlossaryImportCallback,
+    Glossaries
+} from "./glossaries";
+export {
     TextBlock,
     TextResult,
-    DetectResult
-} from "./translator/models";
-export {
-    Documents,
-    DocumentTranslateOptions,
-    Memories,
-    MemoryImportCallback,
+    DetectResult,
+    NGGlossaryMatch,
+    NGMemoryMatch,
     TranslateOptions,
     Translator,
     TranslatorOptions
-} from "./translator/translator";
+} from "./translator";
