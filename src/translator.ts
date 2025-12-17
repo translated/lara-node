@@ -1,11 +1,12 @@
 import type { Credentials } from "./credentials";
-import createClient, { type LaraClient } from "./net";
-import { Memories } from "./memories";
 import { Documents } from "./documents";
 import { Glossaries } from "./glossaries";
+import { Memories } from "./memories";
+import createClient, { type LaraClient } from "./net";
 
 export type TranslatorOptions = {
     serverUrl?: string;
+    keepAlive?: boolean;
 };
 
 export interface NGMemoryMatch {
@@ -70,7 +71,12 @@ export class Translator {
     public readonly glossaries: Glossaries;
 
     constructor(credentials: Credentials, options?: TranslatorOptions) {
-        this.client = createClient(credentials.accessKeyId, credentials.accessKeySecret, options?.serverUrl);
+        this.client = createClient(
+            credentials.accessKeyId,
+            credentials.accessKeySecret,
+            options?.serverUrl,
+            options?.keepAlive
+        );
         this.memories = new Memories(this.client);
         this.documents = new Documents(this.client);
         this.glossaries = new Glossaries(this.client);

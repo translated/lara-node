@@ -1,6 +1,6 @@
 import { LaraApiError, TimeoutError } from "./errors";
-import { LaraClient } from "./net";
-import { MultiPartFile } from "./net/client";
+import type { LaraClient } from "./net";
+import type { MultiPartFile } from "./net/client";
 
 export interface Memory {
     readonly id: string;

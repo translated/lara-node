@@ -6,7 +6,12 @@ export { LaraClient } from "./client";
 
 const DEFAULT_BASE_URL: string = "https://api.laratranslate.com";
 
-export default function create(accessKeyId: string, accessKeySecret: string, baseUrl?: string): LaraClient {
+export default function create(
+    accessKeyId: string,
+    accessKeySecret: string,
+    baseUrl?: string,
+    keepAlive?: boolean
+): LaraClient {
     const url = new URL(baseUrl || DEFAULT_BASE_URL);
 
     if (url.protocol !== "https:" && url.protocol !== "http:")
@@ -19,5 +24,5 @@ export default function create(accessKeyId: string, accessKeySecret: string, bas
     };
 
     if (typeof window !== "undefined") return new BrowserLaraClient(parsedURL, accessKeyId, accessKeySecret);
-    else return new NodeLaraClient(parsedURL, accessKeyId, accessKeySecret);
+    else return new NodeLaraClient(parsedURL, accessKeyId, accessKeySecret, keepAlive ?? true);
 }

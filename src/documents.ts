@@ -1,11 +1,11 @@
 import { LaraApiError, TimeoutError } from "./errors";
-import { LaraClient } from "./net";
-import { MultiPartFile } from "./net/client";
-import { BrowserS3Client } from "./net/s3/browser-client";
-import { NodeS3Client } from "./net/s3/node-client";
-import toSnakeCase from "./utils/to-snake-case";
+import type { LaraClient } from "./net";
+import type { MultiPartFile } from "./net/client";
 import createS3Client from "./net/s3";
-import { TranslationStyle } from "./translator";
+import type { BrowserS3Client } from "./net/s3/browser-client";
+import type { NodeS3Client } from "./net/s3/node-client";
+import type { TranslationStyle } from "./translator";
+import toSnakeCase from "./utils/to-snake-case";
 
 type UploadUrlData = {
     url: string;

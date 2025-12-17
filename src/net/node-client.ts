@@ -10,10 +10,10 @@ export class NodeLaraClient extends LaraClient {
     private readonly baseUrl: BaseURL;
     private readonly agent: http.Agent | https.Agent;
 
-    constructor(baseUrl: BaseURL, accessKeyId: string, accessKeySecret: string) {
+    constructor(baseUrl: BaseURL, accessKeyId: string, accessKeySecret: string, keepAlive: boolean = true) {
         super(accessKeyId, accessKeySecret);
         this.baseUrl = baseUrl;
-        this.agent = baseUrl.secure ? new https.Agent({ keepAlive: true }) : new http.Agent({ keepAlive: true });
+        this.agent = baseUrl.secure ? new https.Agent({ keepAlive }) : new http.Agent({ keepAlive });
     }
 
     protected async send(
@@ -79,7 +79,7 @@ export class NodeLaraClient extends LaraClient {
                     try {
                         json = JSON.parse(data);
                     } catch (_e) {
-                        reject(new SyntaxError("Invalid JSON response"));
+                        return reject(new SyntaxError("Invalid JSON response"));
                     }
 
                     resolve({
@@ -87,9 +87,19 @@ export class NodeLaraClient extends LaraClient {
                         body: json
                     });
                 });
+
+                // close connection on error
+                res.on("error", (err) => {
+                    req.destroy();
+                    return reject(err);
+                });
             });
 
-            req.on("error", reject);
+            // close connection on error
+            req.on("error", (err) => {
+                req.destroy();
+                return reject(err);
+            });
 
             if (requestBody instanceof FormData) {
                 requestBody.pipe(req);
