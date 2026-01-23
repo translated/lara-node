@@ -78,6 +78,17 @@ export abstract class LaraClient {
         return this.request("POST", path, body, files, headers);
     }
 
+    async *postAndGetStream<T>(
+        path: string,
+        body?: Record<string, any>,
+        files?: Record<string, MultiPartFile>,
+        headers?: Record<string, string>
+    ): AsyncGenerator<T> {
+        for await (const chunk of this.requestStream<T>("POST", path, body, files, headers)) {
+            yield chunk;
+        }
+    }
+
     put<T>(
         path: string,
         body?: Record<string, any>,
@@ -85,6 +96,55 @@ export abstract class LaraClient {
         headers?: Record<string, string>
     ): Promise<T> {
         return this.request("PUT", path, body, files, headers);
+    }
+
+    protected async *requestStream<T>(
+        method: HttpMethod,
+        path: string,
+        body?: Record<string, any>,
+        files?: Record<string, MultiPartFile>,
+        headers?: Record<string, string>
+    ): AsyncGenerator<T> {
+        if (!path.startsWith("/")) path = `/${path}`;
+
+        const _headers: Record<string, string> = {
+            "X-HTTP-Method-Override": method,
+            "X-Lara-Date": new Date().toUTCString(),
+            "X-Lara-SDK-Name": "lara-node",
+            "X-Lara-SDK-Version": SdkVersion,
+            ...this.extraHeaders,
+            ...headers
+        };
+
+        if (body) {
+            body = Object.fromEntries(Object.entries(body).filter(([_, v]) => v !== undefined && v !== null));
+
+            if (Object.keys(body).length === 0) body = undefined;
+
+            if (body) {
+                const jsonBody = JSON.stringify(body, undefined, 0);
+                _headers["Content-MD5"] = await this.crypto.digest(jsonBody);
+            }
+        }
+
+        let requestBody: Record<string, any> | undefined;
+        if (files) {
+            // validate files
+            for (const [key, file] of Object.entries(files)) files[key] = this.wrapMultiPartFile(file);
+
+            _headers["Content-Type"] = "multipart/form-data";
+            requestBody = Object.assign({}, files, body);
+        } else {
+            _headers["Content-Type"] = "application/json";
+            if (body) requestBody = body;
+        }
+
+        const signature = await this.sign(method, path, _headers);
+        _headers.Authorization = `Lara ${this.accessKeyId}:${signature}`;
+
+        for await (const chunk of this.sendAndGetStream(path, _headers, requestBody)) {
+            yield parseContent(chunk.body.content) as T;
+        }
     }
 
     protected async request<T>(
@@ -159,6 +219,12 @@ export abstract class LaraClient {
         headers: Record<string, string>,
         body?: Record<string, any>
     ): Promise<ClientResponse>;
+
+    protected abstract sendAndGetStream(
+        path: string,
+        headers: Record<string, string>,
+        body?: Record<string, any>
+    ): AsyncGenerator<ClientResponse>;
 
     protected abstract wrapMultiPartFile(file: MultiPartFile): any;
 }

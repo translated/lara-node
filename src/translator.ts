@@ -55,6 +55,7 @@ export type TranslateOptions = {
     verbose?: boolean;
     headers?: Record<string, string>;
     style?: TranslationStyle;
+    reasoning?: boolean;
 };
 
 export type TranslationStyle = "faithful" | "fluid" | "creative";
@@ -90,7 +91,8 @@ export class Translator {
         text: T,
         source: string | null,
         target: string,
-        options?: TranslateOptions
+        options?: TranslateOptions,
+        callback?: (partialResult: TextResult<T>) => void
     ): Promise<TextResult<T>> {
         const headers: Record<string, string> = {};
 
@@ -104,7 +106,7 @@ export class Translator {
             headers["X-No-Trace"] = "true";
         }
 
-        return await this.client.post<TextResult<T>>(
+        const response = this.client.postAndGetStream<TextResult<T>>(
             "/translate",
             {
                 q: text,
@@ -121,11 +123,22 @@ export class Translator {
                 use_cache: options?.useCache,
                 cache_ttl: options?.cacheTTLSeconds,
                 verbose: options?.verbose,
-                style: options?.style
+                style: options?.style,
+                reasoning: options?.reasoning
             },
             undefined,
             headers
         );
+
+        let lastResult: TextResult<T> | undefined;
+        for await (const partial of response) {
+            if (options?.reasoning && callback) callback(partial);
+            lastResult = partial;
+        }
+
+        if (!lastResult) throw new Error("No translation result received.");
+
+        return lastResult;
     }
 
     async detect(text: string | string[], hint?: string, passlist?: string[]): Promise<DetectResult> {
