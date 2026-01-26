@@ -143,7 +143,16 @@ export abstract class LaraClient {
         _headers.Authorization = `Lara ${this.accessKeyId}:${signature}`;
 
         for await (const chunk of this.sendAndGetStream(path, _headers, requestBody)) {
-            yield parseContent(chunk.body.content) as T;
+            if (200 <= chunk.statusCode && chunk.statusCode < 300) {
+                yield parseContent(chunk.body.content) as T;
+            } else {
+                const error = chunk.body.error || {};
+                throw new LaraApiError(
+                    chunk.statusCode,
+                    error.type || "UnknownError",
+                    error.message || "An unknown error occurred"
+                );
+            }
         }
     }
 
