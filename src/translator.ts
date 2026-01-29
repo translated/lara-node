@@ -63,6 +63,10 @@ export type TranslationStyle = "faithful" | "fluid" | "creative";
 export interface DetectResult {
     language: string;
     contentType: string;
+    predictions: {
+        language: string;
+        confidence: number;
+    }[];
 }
 
 export class Translator {
