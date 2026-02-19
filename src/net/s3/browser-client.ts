@@ -1,6 +1,6 @@
-import type { S3UploadFields } from "../../documents";
-import type { MultiPartFile } from "../client";
-import { S3Client } from "./client";
+import type { MultiPartFile } from "../lara/client";
+import { S3Client, type S3UploadFields } from "./client";
+import type { LaraStream } from "./laraStream.browser";
 
 /** @internal */
 export class BrowserS3Client extends S3Client {
@@ -21,6 +21,14 @@ export class BrowserS3Client extends S3Client {
     public async download(url: string) {
         const response = await fetch(url);
         return response.blob();
+    }
+
+    public async downloadStream(url: string): Promise<LaraStream> {
+        const response = await fetch(url);
+        if (!response.body) {
+            throw new Error("Response body is null");
+        }
+        return response.body;
     }
 
     public wrapMultiPartFile(file: MultiPartFile): File {

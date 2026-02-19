@@ -1,8 +1,10 @@
 import { LaraApiError, TimeoutError } from "./errors";
-import type { LaraClient } from "./net";
-import type { MultiPartFile } from "./net/client";
+import type { LaraClient } from "./net/lara";
+import type { MultiPartFile } from "./net/lara/client";
 import createS3Client from "./net/s3";
 import type { BrowserS3Client } from "./net/s3/browser-client";
+import type { S3UploadFields } from "./net/s3/client";
+import type { LaraStream } from "./net/s3/laraStream";
 import type { NodeS3Client } from "./net/s3/node-client";
 import type { TranslationStyle } from "./translator";
 import toSnakeCase from "./utils/to-snake-case";
@@ -10,12 +12,6 @@ import toSnakeCase from "./utils/to-snake-case";
 type UploadUrlData = {
     url: string;
     fields: S3UploadFields;
-};
-
-export type S3UploadFields = {
-    acl: string;
-    bucket: string;
-    key: string;
 };
 
 // biome-ignore format: keep comments aligned
@@ -48,6 +44,9 @@ export type DocumentDownloadOptions = {
 export type DocumentUploadOptions = DocumentOptions & {
     password?: string;
     extractionParams?: DocxExtractionParams;
+
+    // Optional length of the file in bytes, needed for some upload scenarios
+    contentLength?: number;
 };
 
 export interface Document {
@@ -82,14 +81,14 @@ export class Documents {
         target: string,
         options?: DocumentUploadOptions
     ): Promise<Document> {
-        const { url, fields } = await this.client.get<UploadUrlData>(`/documents/upload-url`, { filename });
+        const { url, fields } = await this.client.get<UploadUrlData>(`/v2/documents/upload-url`, { filename });
 
-        await this.s3Client.upload(url, fields, file);
+        await this.s3Client.upload(url, fields, file, options?.contentLength);
 
         const headers: Record<string, string> = options?.noTrace ? { "X-No-Trace": "true" } : {};
 
         return this.client.post<Document>(
-            "/documents",
+            "/v2/documents",
             {
                 source,
                 target,
@@ -106,15 +105,23 @@ export class Documents {
     }
 
     public async status(id: string): Promise<Document> {
-        return await this.client.get<Document>(`/documents/${id}`);
+        return await this.client.get<Document>(`/v2/documents/${id}`);
     }
 
     public async download(id: string, options?: DocumentDownloadOptions): Promise<Blob | Buffer> {
-        const { url } = await this.client.get<{ url: string }>(`/documents/${id}/download-url`, {
+        const { url } = await this.client.get<{ url: string }>(`/v2/documents/${id}/download-url`, {
             output_format: options?.outputFormat
         });
 
         return await this.s3Client.download(url);
+    }
+
+    public async downloadStream(id: string, options?: DocumentDownloadOptions): Promise<LaraStream> {
+        const { url } = await this.client.get<{ url: string }>(`/v2/documents/${id}/download-url`, {
+            output_format: options?.outputFormat
+        });
+
+        return (await this.s3Client.downloadStream(url)) as LaraStream;
     }
 
     public async translate(
@@ -130,7 +137,8 @@ export class Documents {
             noTrace: options?.noTrace,
             style: options?.style,
             password: options?.password,
-            extractionParams: options?.extractionParams
+            extractionParams: options?.extractionParams,
+            contentLength: options?.contentLength
         };
 
         const { id } = await this.upload(file, filename, source, target, uploadOptions);
@@ -147,6 +155,45 @@ export class Documents {
             const { status, errorReason } = await this.status(id);
 
             if (status === DocumentStatus.TRANSLATED) return await this.download(id, downloadOptions);
+            if (status === DocumentStatus.ERROR) {
+                throw new LaraApiError(500, "DocumentError", errorReason as string);
+            }
+        }
+
+        throw new TimeoutError();
+    }
+
+    public async translateStream(
+        file: MultiPartFile,
+        filename: string,
+        source: string | null,
+        target: string,
+        options?: DocumentTranslateOptions
+    ): Promise<LaraStream> {
+        const uploadOptions: DocumentUploadOptions = {
+            adaptTo: options?.adaptTo,
+            glossaries: options?.glossaries,
+            noTrace: options?.noTrace,
+            style: options?.style,
+            password: options?.password,
+            extractionParams: options?.extractionParams,
+            contentLength: options?.contentLength
+        };
+
+        const { id } = await this.upload(file, filename, source, target, uploadOptions);
+
+        const downloadOptions = options?.outputFormat ? { outputFormat: options.outputFormat } : undefined;
+
+        const pollingInterval = 2000;
+        const maxWaitTime = 1000 * 60 * 15; // 15 minutes
+        const start = Date.now();
+
+        while (Date.now() - start < maxWaitTime) {
+            await new Promise((resolve) => setTimeout(resolve, pollingInterval));
+
+            const { status, errorReason } = await this.status(id);
+
+            if (status === DocumentStatus.TRANSLATED) return await this.downloadStream(id, downloadOptions);
             if (status === DocumentStatus.ERROR) {
                 throw new LaraApiError(500, "DocumentError", errorReason as string);
             }

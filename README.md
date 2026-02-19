@@ -10,6 +10,7 @@ All major translation features are accessible, making it easy to integrate and c
 ## 🌍 **Features:**
 - **Text Translation**: Single strings, multiple strings, and complex text blocks
 - **Document Translation**: Word, PDF, and other document formats with status monitoring
+- **Image Translation**: Translate whole images or extract and translate text blocks
 - **Translation Memory**: Store and reuse translations for consistency
 - **Glossaries**: Enforce terminology standards across translations
 - **Language Detection**: Automatic source language identification
@@ -89,6 +90,17 @@ node text_translation.js
 ```bash
 cd examples
 node document_translation.js
+```
+
+### Image Translation
+- **[image_translation.js](examples/image_translation.js)** - Image translation examples
+    - Basic image translation
+    - Advanced options with memories and glossaries
+    - Extract and translate text from an image
+
+```bash
+cd examples
+node image_translation.js
 ```
 
 ### Translation Memory Management
@@ -243,6 +255,26 @@ const status = await lara.documents.status(document.id);
 #### Download translated document
 ```javascript
 const translatedContent = await lara.documents.download(document.id);
+```
+
+### 🖼️ Image Translation
+
+```javascript
+const fs = require("fs");
+
+const imageStream = fs.createReadStream("/path/to/your/image.png"); // Replace with actual file path
+
+// Translate image and receive a translated image stream
+const translatedImageStream = await lara.images.translate(imageStream, "en", "fr", {
+    textRemoval: "inpainting",
+    style: "faithful"
+});
+
+// Extract and translate text blocks from an image
+const textBlocks = await lara.images.translateText(imageStream, "en", "fr", {
+    adaptTo: ["mem_1A2b3C4d5E6f7G8h9I0jKl"],
+    glossaries: ["gls_1A2b3C4d5E6f7G8h9I0jKl"],
+});
 ```
 
 ### 🧠 Memory Management

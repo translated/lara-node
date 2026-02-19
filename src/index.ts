@@ -1,4 +1,10 @@
-export { Credentials } from "./credentials";
+export {
+    Audio,
+    AudioStatus,
+    AudioTranslator,
+    AudioUploadOptions
+} from "./audioTranslator";
+export { AccessKey, AuthToken, Credentials } from "./credentials";
 export {
     Document,
     DocumentDownloadOptions,
@@ -10,16 +16,25 @@ export {
 export { LaraApiError, LaraError, TimeoutError } from "./errors";
 export {
     Glossaries,
+    GlossaryFileFormat,
     GlossaryImport,
     GlossaryImportCallback
 } from "./glossaries";
+export {
+    ImageParagraph,
+    ImageTextResult,
+    ImageTextTranslationOptions,
+    ImageTranslationOptions,
+    ImageTranslator
+} from "./imageTranslator";
 export {
     Memories,
     Memory,
     MemoryImport,
     MemoryImportCallback
 } from "./memories";
-export { MultiPartFile } from "./net/client";
+export { MultiPartFile } from "./net/lara/client";
+export type { LaraStream } from "./net/s3/laraStream";
 export {
     DetectResult,
     NGGlossaryMatch,

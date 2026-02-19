@@ -1,11 +1,16 @@
-import type { Credentials } from "./credentials";
+import { AudioTranslator } from "./audioTranslator";
+import type { AccessKey, AuthToken } from "./credentials";
 import { Documents } from "./documents";
 import { Glossaries } from "./glossaries";
+import { ImageTranslator } from "./imageTranslator";
 import { Memories } from "./memories";
-import createClient, { type LaraClient } from "./net";
+import createClient, { HttpClient, type LaraClient } from "./net/lara";
+import { DEFAULT_BASE_URL } from "./utils/defaultBaseUrl";
+import { version } from "./utils/sdk-version";
 
 export type TranslatorOptions = {
     serverUrl?: string;
+    connectionTimeoutMs?: number;
     keepAlive?: boolean;
 };
 
@@ -74,21 +79,24 @@ export class Translator {
     public readonly memories: Memories;
     public readonly documents: Documents;
     public readonly glossaries: Glossaries;
+    public readonly audio: AudioTranslator;
+    public readonly images: ImageTranslator;
 
-    constructor(credentials: Credentials, options?: TranslatorOptions) {
-        this.client = createClient(
-            credentials.accessKeyId,
-            credentials.accessKeySecret,
-            options?.serverUrl,
-            options?.keepAlive
-        );
+    constructor(auth: AccessKey | AuthToken, options?: TranslatorOptions) {
+        this.client = createClient(auth, options?.serverUrl, options?.keepAlive, options?.connectionTimeoutMs);
         this.memories = new Memories(this.client);
         this.documents = new Documents(this.client);
         this.glossaries = new Glossaries(this.client);
+        this.audio = new AudioTranslator(this.client);
+        this.images = new ImageTranslator(this.client);
+    }
+
+    get version(): string {
+        return version;
     }
 
     async getLanguages(): Promise<string[]> {
-        return await this.client.get<string[]>("/languages");
+        return await this.client.get<string[]>("/v2/languages");
     }
 
     async translate<T extends string | string[] | TextBlock[]>(
@@ -146,10 +154,16 @@ export class Translator {
     }
 
     async detect(text: string | string[], hint?: string, passlist?: string[]): Promise<DetectResult> {
-        return await this.client.post<DetectResult>("/detect", {
+        return await this.client.post<DetectResult>("/v2/detect", {
             q: text,
             hint,
             passlist
         });
+    }
+
+    static async getLoginUrl(serverUrl?: string): Promise<string> {
+        if (!serverUrl) serverUrl = DEFAULT_BASE_URL;
+        const { body } = await HttpClient.get(`${serverUrl.replace(/\/+$/, "")}/v2/auth/login-page`);
+        return body;
     }
 }

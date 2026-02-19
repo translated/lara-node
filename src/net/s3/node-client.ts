@@ -2,18 +2,18 @@ import fs from "node:fs";
 import https from "node:https";
 import { Readable } from "node:stream";
 import FormData from "form-data";
-import type { S3UploadFields } from "../../documents";
-import type { MultiPartFile } from "../client";
-import { S3Client } from "./client";
+import type { MultiPartFile } from "../lara/client";
+import { S3Client, type S3UploadFields } from "./client";
+import type { LaraStream } from "./laraStream";
 
 /** @internal */
 export class NodeS3Client extends S3Client {
-    protected async _upload(url: string, fields: S3UploadFields, file: Readable) {
+    protected async _upload(url: string, fields: S3UploadFields, file: Readable, length?: number) {
         const formData = new FormData();
         for (const [key, value] of Object.entries(fields)) {
             formData.append(key, value);
         }
-        formData.append("file", file);
+        formData.append("file", file, length ? { knownLength: length } : undefined);
 
         return new Promise<void>((resolve, reject) => {
             formData.submit(url, (err) => {
@@ -29,6 +29,17 @@ export class NodeS3Client extends S3Client {
                 const chunks: Buffer[] = [];
                 res.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
                 res.on("end", () => resolve(Buffer.concat(chunks)));
+            });
+
+            req.on("error", reject);
+            req.end();
+        });
+    }
+
+    public async downloadStream(url: string): Promise<LaraStream> {
+        return new Promise<LaraStream>((resolve, reject) => {
+            const req = https.request(url, { method: "GET" }, (res) => {
+                resolve(res);
             });
 
             req.on("error", reject);

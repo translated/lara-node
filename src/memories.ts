@@ -1,6 +1,6 @@
 import { LaraApiError, TimeoutError } from "./errors";
-import type { LaraClient } from "./net";
-import type { MultiPartFile } from "./net/client";
+import type { LaraClient } from "./net/lara";
+import type { MultiPartFile } from "./net/lara/client";
 
 export interface Memory {
     readonly id: string;
@@ -35,11 +35,11 @@ export class Memories {
     }
 
     async list(): Promise<Memory[]> {
-        return await this.client.get<Memory[]>("/memories");
+        return await this.client.get<Memory[]>("/v2/memories");
     }
 
     async create(name: string, externalId?: string): Promise<Memory> {
-        return await this.client.post<Memory>("/memories", {
+        return await this.client.post<Memory>("/v2/memories", {
             name,
             external_id: externalId
         });
@@ -47,7 +47,7 @@ export class Memories {
 
     async get(id: string): Promise<Memory | null> {
         try {
-            return await this.client.get<Memory>(`/memories/${id}`);
+            return await this.client.get<Memory>(`/v2/memories/${id}`);
         } catch (e) {
             if (e instanceof LaraApiError && e.statusCode === 404) {
                 return null;
@@ -58,15 +58,15 @@ export class Memories {
     }
 
     async delete(id: string): Promise<Memory> {
-        return await this.client.delete<Memory>(`/memories/${id}`);
+        return await this.client.delete<Memory>(`/v2/memories/${id}`);
     }
 
     async update(id: string, name: string): Promise<Memory> {
-        return await this.client.put<Memory>(`/memories/${id}`, { name });
+        return await this.client.put<Memory>(`/v2/memories/${id}`, { name });
     }
 
     async connect<T extends string | string[]>(ids: T): Promise<T extends string ? Memory : Memory[]> {
-        const memories = await this.client.post<Memory[]>("/memories/connect", {
+        const memories = await this.client.post<Memory[]>("/v2/memories/connect", {
             ids: Array.isArray(ids) ? ids : [ids]
         });
 
@@ -75,7 +75,7 @@ export class Memories {
 
     async importTmx(id: string, tmx: MultiPartFile, gzip: boolean = false): Promise<MemoryImport> {
         return await this.client.post<MemoryImport>(
-            `/memories/${id}/import`,
+            `/v2/memories/${id}/import`,
             {
                 compression: gzip ? "gzip" : undefined
             },
@@ -108,9 +108,9 @@ export class Memories {
 
         if (Array.isArray(id)) {
             body.ids = id;
-            return await this.client.put<MemoryImport>("/memories/content", body, undefined, headers);
+            return await this.client.put<MemoryImport>("/v2/memories/content", body, undefined, headers);
         } else {
-            return await this.client.put<MemoryImport>(`/memories/${id}/content`, body, undefined, headers);
+            return await this.client.put<MemoryImport>(`/v2/memories/${id}/content`, body, undefined, headers);
         }
     }
 
@@ -136,14 +136,14 @@ export class Memories {
 
         if (Array.isArray(id)) {
             body.ids = id;
-            return await this.client.delete<MemoryImport>("/memories/content", body);
+            return await this.client.delete<MemoryImport>("/v2/memories/content", undefined, body);
         } else {
-            return await this.client.delete<MemoryImport>(`/memories/${id}/content`, body);
+            return await this.client.delete<MemoryImport>(`/v2/memories/${id}/content`, undefined, body);
         }
     }
 
     async getImportStatus(id: string): Promise<MemoryImport> {
-        return await this.client.get<MemoryImport>(`/memories/imports/${id}`);
+        return await this.client.get<MemoryImport>(`/v2/memories/imports/${id}`);
     }
 
     async waitForImport(

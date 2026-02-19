@@ -11,6 +11,8 @@ const path = require("path");
  * - Glossary export
  * - Glossary terms count
  * - Import status checking
+ * - Add or replace glossary entries
+ * - Delete glossary entries
  */
 
 async function main() {
@@ -134,6 +136,62 @@ async function main() {
             console.log();
         } catch (error) {
             console.log(`Error getting glossary terms count: ${error.message}\n`);
+        }
+
+        // Example 6: Add or replace glossary entries
+        console.log("=== Add or Replace Glossary Entries ===");
+        try {
+            // Add a new entry with multiple language terms
+            const terms = [
+                { language: "en-US", value: "computer" },
+                { language: "it-IT", value: "computer" }
+            ];
+            const addResult = await lara.glossaries.addOrReplaceEntry(glossaryId, terms);
+            console.log(`✅ Entry added/replaced (import ID: ${addResult.id})`);
+
+            // Wait for the import to complete
+            const completedAdd = await lara.glossaries.waitForImport(addResult);
+            console.log(`   Import progress: ${Math.round(completedAdd.progress * 100)}%`);
+
+            // Add another entry with a custom GUID
+            const termsWithGuid = [
+                { language: "en-US", value: "keyboard" },
+                { language: "it-IT", value: "tastiera" }
+            ];
+            const addWithGuidResult = await lara.glossaries.addOrReplaceEntry(glossaryId, termsWithGuid, "custom-guid-123");
+            console.log(`✅ Entry added with GUID (import ID: ${addWithGuidResult.id})`);
+            await lara.glossaries.waitForImport(addWithGuidResult);
+
+            // Replace an existing entry by using the same GUID
+            const updatedTerms = [
+                { language: "en-US", value: "keyboard" },
+                { language: "it-IT", value: "tastiera" },
+                { language: "fr-FR", value: "clavier" }
+            ];
+            const replaceResult = await lara.glossaries.addOrReplaceEntry(glossaryId, updatedTerms, "custom-guid-123");
+            console.log(`✅ Entry replaced with updated terms (import ID: ${replaceResult.id})`);
+            await lara.glossaries.waitForImport(replaceResult);
+            console.log();
+        } catch (error) {
+            console.log(`Error adding/replacing entry: ${error.message}\n`);
+        }
+
+        // Example 7: Delete glossary entries
+        console.log("=== Delete Glossary Entries ===");
+        try {
+            // Delete an entry by GUID
+            const deleteByGuidResult = await lara.glossaries.deleteEntry(glossaryId, undefined, "custom-guid-123");
+            console.log(`✅ Entry deleted by GUID (import ID: ${deleteByGuidResult.id})`);
+            await lara.glossaries.waitForImport(deleteByGuidResult);
+
+            // Delete an entry by term
+            const term = { language: "en-US", value: "computer" };
+            const deleteByTermResult = await lara.glossaries.deleteEntry(glossaryId, term);
+            console.log(`✅ Entry deleted by term: ${term.language} -> "${term.value}" (import ID: ${deleteByTermResult.id})`);
+            await lara.glossaries.waitForImport(deleteByTermResult);
+            console.log();
+        } catch (error) {
+            console.log(`Error deleting entry: ${error.message}\n`);
         }
 
     } catch (error) {

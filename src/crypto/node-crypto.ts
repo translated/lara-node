@@ -3,11 +3,11 @@ import type { PortableCrypto } from "./portable-crypto";
 
 /** @internal */
 export class NodeCrypto implements PortableCrypto {
-    digest(data: string): Promise<string> {
+    digestBase64(data: string): Promise<string> {
         return new Promise((resolve) => {
             const hash = crypto.createHash("md5");
-            hash.update(data);
-            resolve(hash.digest("hex"));
+            hash.update(data, "utf8");
+            resolve(hash.digest("base64"));
         });
     }
 

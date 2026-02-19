@@ -1,16 +1,15 @@
+import type { AccessKey, AuthToken } from "../../credentials";
+import { DEFAULT_BASE_URL } from "../../utils/defaultBaseUrl";
 import { BrowserLaraClient } from "./browser-client";
 import type { BaseURL, LaraClient } from "./client";
-import { NodeLaraClient } from "./node-client";
 
 export { LaraClient } from "./client";
 
-const DEFAULT_BASE_URL: string = "https://api.laratranslate.com";
-
 export default function create(
-    accessKeyId: string,
-    accessKeySecret: string,
+    auth: AccessKey | AuthToken,
     baseUrl?: string,
-    keepAlive?: boolean
+    keepAlive?: boolean,
+    timeout?: number
 ): LaraClient {
     const url = new URL(baseUrl || DEFAULT_BASE_URL);
 
@@ -23,6 +22,7 @@ export default function create(
         port: url.port ? parseInt(url.port, 10) : url.protocol === "https:" ? 443 : 80
     };
 
-    if (typeof window !== "undefined") return new BrowserLaraClient(parsedURL, accessKeyId, accessKeySecret);
-    else return new NodeLaraClient(parsedURL, accessKeyId, accessKeySecret, keepAlive ?? true);
+    return new BrowserLaraClient(parsedURL, auth, keepAlive ?? true, timeout);
 }
+
+export { BrowserClient as HttpClient } from "./browser-client";

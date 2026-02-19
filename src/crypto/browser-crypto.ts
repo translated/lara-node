@@ -8,14 +8,11 @@ export class BrowserCrypto implements PortableCrypto {
         this.subtle = window.crypto.subtle;
     }
 
-    /**
-     * MD5 in browser is not supported, so we use SHA-256 instead and return the first 16 bytes
-     */
-    async digest(data: string): Promise<string> {
+    async digestBase64(data: string): Promise<string> {
         const encoder = new TextEncoder();
         const buffer = (await this.subtle.digest("sha-256", encoder.encode(data))).slice(0, 16);
 
-        return [...new Uint8Array(buffer)].map((x) => x.toString(16).padStart(2, "0")).join("");
+        return btoa(String.fromCharCode(...new Uint8Array(buffer)));
     }
 
     async hmac(key: string, data: string): Promise<string> {
