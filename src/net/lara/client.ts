@@ -173,8 +173,28 @@ export abstract class LaraClient {
     // Authentication
     // ─────────────────────────────────────────────────────────────────────────────
 
+    private isTokenExpired(bufferMs: number = 5_000): boolean {
+        if (!this.token) return true;
+        try {
+            const parts = this.token.split(".");
+            if (parts.length !== 3) return true;
+            let b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            while (b64.length % 4) b64 += "=";
+            const decoded = typeof Buffer !== "undefined"
+                // Node solution
+                ? Buffer.from(b64, "base64").toString("utf-8")
+                // Browser solution
+                : atob(b64);
+            const { exp } = JSON.parse(decoded);
+            return typeof exp === "number" && exp * 1000 <= Date.now() + bufferMs;
+        } catch {
+            return true;
+        }
+    }
+
     private async ensureAuthenticated(): Promise<void> {
-        if (this.token) return;
+        if (this.token && !this.isTokenExpired()) return;
+        this.token = undefined;
 
         // Use existing promise if authentication is already in progress (mutex pattern)
         if (this.authenticationPromise) {
@@ -186,6 +206,7 @@ export abstract class LaraClient {
 
         try {
             await this.authenticationPromise;
+            this.authenticationPromise = undefined;
         } catch (error) {
             // Clear promise and retry once
             this.authenticationPromise = undefined;
@@ -197,6 +218,7 @@ export abstract class LaraClient {
             try {
                 this.authenticationPromise = this.performAuthentication();
                 await this.authenticationPromise;
+                this.authenticationPromise = undefined;
             } catch (retryError) {
                 this.authenticationPromise = undefined;
                 throw retryError instanceof LaraApiError
