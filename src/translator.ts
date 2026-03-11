@@ -61,6 +61,7 @@ export type TranslateOptions = {
     headers?: Record<string, string>;
     style?: TranslationStyle;
     reasoning?: boolean;
+    metadata?: string | Record<string, unknown>;
 };
 
 export type TranslationStyle = "faithful" | "fluid" | "creative";
@@ -136,7 +137,8 @@ export class Translator {
                 cache_ttl: options?.cacheTTLSeconds,
                 verbose: options?.verbose,
                 style: options?.style,
-                reasoning: options?.reasoning
+                reasoning: options?.reasoning,
+                metadata: options?.metadata
             },
             undefined,
             headers
