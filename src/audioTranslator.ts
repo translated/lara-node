@@ -15,13 +15,18 @@ type UploadUrlData = {
 
 // biome-ignore format: keep comments aligned
 export enum AudioStatus {
-  INITIALIZED = "initialized",    // just been created
-  ANALYZING = "analyzing",        // being analyzed for language detection and chars count
-  PAUSED = "paused",              // paused after analysis, needs user confirm
-  READY = "ready",                // ready to be translated
-  TRANSLATING = "translating",
-  TRANSLATED = "translated",
-  ERROR = "error"
+    INITIALIZED = "initialized",    // just been created
+    ANALYZING = "analyzing",        // being analyzed for language detection and chars count
+    PAUSED = "paused",              // paused after analysis, needs user confirm
+    READY = "ready",                // ready to be translated
+    TRANSLATING = "translating",
+    TRANSLATED = "translated",
+    ERROR = "error"
+}
+
+export enum VoiceGender {
+    MALE = "male",
+    FEMALE = "female",
 }
 
 export type AudioOptions = {
@@ -29,6 +34,7 @@ export type AudioOptions = {
     glossaries?: string[];
     noTrace?: boolean;
     style?: TranslationStyle;
+    voiceGender?: VoiceGender;
 };
 
 export type AudioUploadOptions = AudioOptions & {
@@ -80,7 +86,8 @@ export class AudioTranslator {
                 s3key: fields.key,
                 adapt_to: options?.adaptTo,
                 glossaries: options?.glossaries,
-                style: options?.style
+                style: options?.style,
+                voice_gender: options?.voiceGender
             },
             undefined,
             headers

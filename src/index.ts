@@ -2,7 +2,8 @@ export {
     Audio,
     AudioStatus,
     AudioTranslator,
-    AudioUploadOptions
+    AudioUploadOptions,
+    VoiceGender
 } from "./audioTranslator";
 export { AccessKey, AuthToken, Credentials } from "./credentials";
 export {
