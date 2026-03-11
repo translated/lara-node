@@ -25,9 +25,12 @@ export type ImageTextTranslationOptions = {
     verbose?: boolean;
 };
 
-export type ImageTranslationOptions = Omit<ImageTextTranslationOptions & {
-    textRemoval?: "overlay" | "inpainting";
-}, "verbose">;
+export type ImageTranslationOptions = Omit<
+    ImageTextTranslationOptions & {
+        textRemoval?: "overlay" | "inpainting";
+    },
+    "verbose"
+>;
 
 export class ImageTranslator {
     private readonly client: LaraClient;

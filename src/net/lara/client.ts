@@ -180,11 +180,12 @@ export abstract class LaraClient {
             if (parts.length !== 3) return true;
             let b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
             while (b64.length % 4) b64 += "=";
-            const decoded = typeof Buffer !== "undefined"
-                // Node solution
-                ? Buffer.from(b64, "base64").toString("utf-8")
-                // Browser solution
-                : atob(b64);
+            const decoded =
+                typeof Buffer !== "undefined"
+                    ? // Node solution
+                      Buffer.from(b64, "base64").toString("utf-8")
+                    : // Browser solution
+                      atob(b64);
             const { exp } = JSON.parse(decoded);
             return typeof exp === "number" && exp * 1000 <= Date.now() + bufferMs;
         } catch {

@@ -26,7 +26,7 @@ export enum AudioStatus {
 
 export enum VoiceGender {
     MALE = "male",
-    FEMALE = "female",
+    FEMALE = "female"
 }
 
 export type AudioOptions = {
