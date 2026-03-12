@@ -36,6 +36,7 @@ export abstract class LaraClient {
     protected token?: string;
     protected refreshToken?: string;
     private authenticationPromise?: Promise<void>;
+    private refreshPromise?: Promise<void>;
 
     protected constructor(auth: AccessKey | AuthToken) {
         if (auth instanceof AccessKey) {
@@ -128,7 +129,7 @@ export abstract class LaraClient {
         // Handle 401 - token expired, refresh and retry once
         if (response.statusCode === 401 && retryCount < 1) {
             this.token = undefined;
-            await this.refreshTokens();
+            await this.refreshOrReauthenticate();
             return this.request(method, path, body, files, headers, retryCount + 1, streamResponse);
         }
 
@@ -155,7 +156,7 @@ export abstract class LaraClient {
             // Handle 401 - token expired, refresh and retry once
             if (chunk.statusCode === 401 && retryCount < 1) {
                 this.token = undefined;
-                await this.refreshTokens();
+                await this.refreshOrReauthenticate();
                 yield* this.requestStream<T>(method, path, body, files, headers, retryCount + 1);
                 return;
             }
@@ -230,31 +231,52 @@ export abstract class LaraClient {
     }
 
     private async performAuthentication(): Promise<void> {
-        // If we have a refresh token, use it
-        if (this.refreshToken) {
-            return this.refreshTokens();
-        }
-
-        // If we have a pre-existing auth token, use it directly
+        // If we have a pre-existing auth token, use it directly (one-shot, consumed before any network call)
         if (this.authToken) {
             this.token = this.authToken.token;
             this.refreshToken = this.authToken.refreshToken;
-            this.authToken = undefined; // Clear after use
+            this.authToken = undefined;
             return;
         }
 
-        // Authenticate with credentials
-        if (this.accessKey) {
-            return this.authenticateWithAccessKey();
+        return this.doRefreshOrReauthenticate();
+    }
+
+    private refreshOrReauthenticate(): Promise<void> {
+        if (this.refreshPromise) return this.refreshPromise;
+
+        this.refreshPromise = this.doRefreshOrReauthenticate().finally(() => {
+            this.refreshPromise = undefined;
+        });
+
+        return this.refreshPromise;
+    }
+
+    private async doRefreshOrReauthenticate(): Promise<void> {
+        if (this.refreshToken) {
+            try {
+                await this.refreshTokens();
+                return;
+            } catch (error) {
+                this.refreshToken = undefined;
+
+                if (!this.accessKey) throw error;
+            }
         }
 
-        throw new Error("No authentication method provided");
+        if (this.accessKey) {
+            await this.authenticateWithAccessKey();
+            return;
+        }
+
+        throw new Error("No authentication method available for token renewal");
     }
 
     private async refreshTokens(): Promise<void> {
         const headers: Record<string, string> = {
             Authorization: `Bearer ${this.refreshToken}`,
-            "X-Lara-Date": new Date().toUTCString()
+            "X-Lara-Date": new Date().toUTCString(),
+            ...this.extraHeaders
         };
 
         const response = await this.send("POST", "/v2/auth/refresh", headers);
@@ -271,7 +293,8 @@ export abstract class LaraClient {
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
             "X-Lara-Date": new Date().toUTCString(),
-            "Content-MD5": contentMD5
+            "Content-MD5": contentMD5,
+            ...this.extraHeaders
         };
 
         headers.Authorization = `Lara:${await this.sign("POST", "/v2/auth", headers)}`;
@@ -350,7 +373,10 @@ export abstract class LaraClient {
     private handleAuthResponse(response: ClientResponse): void {
         if (this.isSuccessResponse(response)) {
             this.token = response.body.token;
-            this.refreshToken = response.headers["x-lara-refresh-token"] as string;
+            const newRefreshToken = response.headers["x-lara-refresh-token"] as string | undefined;
+            if (newRefreshToken) {
+                this.refreshToken = newRefreshToken;
+            }
             return;
         }
 
