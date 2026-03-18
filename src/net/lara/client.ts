@@ -322,8 +322,8 @@ export abstract class LaraClient {
             "X-Lara-Date": new Date().toUTCString(),
             "X-Lara-SDK-Name": "lara-node",
             "X-Lara-SDK-Version": SdkVersion,
-            ...this.extraHeaders,
-            ...customHeaders
+            ...this.filterNullish(this.extraHeaders),
+            ...this.filterNullish(customHeaders)
         };
 
         const filteredBody = this.filterNullish(body);
