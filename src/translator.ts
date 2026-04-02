@@ -170,10 +170,22 @@ export class Translator {
     }
 
     async detect(text: string | string[], hint?: string, passlist?: string[]): Promise<DetectResult> {
-        return await this.client.post<DetectResult>("/v2/detect", {
+        return await this.client.post<DetectResult>("/v2/detect/language", {
             q: text,
             hint,
             passlist
+        });
+    }
+
+    async detectProfanities(
+        text: string,
+        language: string,
+        contentType: string
+    ): Promise<ProfanityDetectResult> {
+        return await this.client.post<ProfanityDetectResult>("/v2/detect/profanities", {
+            text,
+            language,
+            content_type: contentType
         });
     }
 
