@@ -11,7 +11,7 @@ export class BrowserLaraClient extends LaraClient {
     private readonly baseUrl: string;
     private readonly timeout: number | undefined;
 
-    constructor(baseUrl: BaseURL, auth: AccessKey | AuthToken, keepAlive: boolean, timeout?: number) {
+    constructor(baseUrl: BaseURL, auth: AccessKey | AuthToken, _keepAlive: boolean, timeout?: number) {
         super(auth);
 
         let url = `${baseUrl.secure ? "https" : "http"}://${baseUrl.hostname}`;
@@ -210,6 +210,7 @@ export class BrowserLaraClient extends LaraClient {
     }
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: used as a namespace for HTTP client methods
 export class BrowserClient {
     static async get(url: string, headers: Record<string, string>): Promise<ClientResponse> {
         return BrowserClient.send("GET", url, headers);

@@ -177,11 +177,7 @@ export class Translator {
         });
     }
 
-    async detectProfanities(
-        text: string,
-        language: string,
-        contentType: string
-    ): Promise<ProfanityDetectResult> {
+    async detectProfanities(text: string, language: string, contentType: string): Promise<ProfanityDetectResult> {
         return await this.client.post<ProfanityDetectResult>("/v2/detect/profanities", {
             text,
             language,

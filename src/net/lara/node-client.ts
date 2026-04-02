@@ -310,6 +310,7 @@ export class NodeLaraClient extends LaraClient {
     }
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: used as a namespace for HTTP client methods
 export class NodeClient {
     static get(url: string, headers?: Record<string, string>): Promise<ClientResponse> {
         return NodeClient.send("GET", url, headers);
