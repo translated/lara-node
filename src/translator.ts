@@ -30,6 +30,16 @@ export interface NGGlossaryMatch {
     translation: string;
 }
 
+export interface ProfanityDetectResult {
+    maskedText: string;
+    profanities: {
+        text: string;
+        startCharIndex: number;
+        endCharIndex: number;
+        score: number;
+    }[];
+}
+
 export interface TextBlock {
     readonly text: string;
     readonly translatable?: boolean;
@@ -43,6 +53,7 @@ export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly glossaries?: string[];
     readonly adaptedToMatches?: NGMemoryMatch[] | NGMemoryMatch[][];
     readonly glossariesMatches?: NGGlossaryMatch[] | NGGlossaryMatch[][];
+    readonly profanities?: ProfanityDetectResult | ProfanityDetectResult[];
 }
 
 export type TranslateOptions = {
@@ -62,10 +73,12 @@ export type TranslateOptions = {
     style?: TranslationStyle;
     reasoning?: boolean;
     metadata?: string | Record<string, unknown>;
+    profanityFilter?: ProfanityFilter;
 };
 
 export type TranslationStyle = "faithful" | "fluid" | "creative";
 
+export type ProfanityFilter = "detect" | "avoid" | "hide";
 export interface DetectResult {
     language: string;
     contentType: string;
@@ -138,7 +151,8 @@ export class Translator {
                 verbose: options?.verbose,
                 style: options?.style,
                 reasoning: options?.reasoning,
-                metadata: options?.metadata
+                metadata: options?.metadata,
+                profanity_filter: options?.profanityFilter
             },
             undefined,
             headers

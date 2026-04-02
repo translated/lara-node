@@ -2,7 +2,7 @@ const { Credentials, Translator } = require('@translated/lara');
 
 /**
  * Complete text translation examples for the Lara Node.js SDK
- * 
+ *
  * This example demonstrates:
  * - Single string translation
  * - Multiple strings translation
@@ -24,7 +24,7 @@ async function main() {
 
     const credentials = new Credentials(accessKeyId, accessKeySecret);
     const lara = new Translator(credentials);
-    
+
     try {
         // Example 1: Basic single string translation
         console.log("=== Basic Single String Translation ===");
@@ -48,7 +48,7 @@ async function main() {
             { text: "<div class=\"separator\"></div>", translatable: false },  // Non-translatable HTML
             { text: "Every page you turn is a new journey, and the best part?", translatable: true }
         ];
-        
+
         const result3 = await lara.translate(textBlocks, "en-US", "it-IT");
         console.log("Original TextBlocks: " + textBlocks.length + " blocks");
         console.log("Translated blocks: " + result3.translation.length);
@@ -61,7 +61,7 @@ async function main() {
         const options1 = {
             instructions: ["Be formal", "Use technical terminology"]
         };
-        
+
         const result4 = await lara.translate("Could you send me the report by tomorrow morning?", "en-US", "de-DE", options1);
         console.log("Original: Could you send me the report by tomorrow morning?");
         console.log("German (formal): " + result4.translation + "\n");
@@ -83,23 +83,43 @@ async function main() {
             contentType: "text/plain",
             timeoutInMillis: 10000,
         };
-        
+
         const result6 = await lara.translate("This is a comprehensive translation example", "en-US", "it-IT", options2);
         console.log("Original: This is a comprehensive translation example");
         console.log("Italian (with all options): " + result6.translation + "\n");
 
-        // Example 7: Get available languages
+        // Example 7: Profanity filter options
+        console.log("=== Translation with Profanity Filter Options ===");
+        const profanityText = "Don't be such a tool.";
+        const detectResult = await lara.translate(profanityText, "en-US", "it-IT", {
+            profanityFilter: "detect",
+            verbose: true
+        });
+        const hideResult = await lara.translate(profanityText, "en-US", "it-IT", {
+            profanityFilter: "hide",
+            verbose: true
+        });
+        const avoidResult = await lara.translate(profanityText, "en-US", "it-IT", {
+            profanityFilter: "avoid",
+            verbose: true
+        });
+        console.log("Original: " + profanityText);
+        console.log("Detect mode translation: " + detectResult.translation);
+        console.log("Hide mode translation: " + hideResult.translation);
+        console.log("Avoid mode translation: " + avoidResult.translation + "\n");
+
+        // Example 8: Get available languages
         console.log("=== Available Languages ===");
         const languages = await lara.getLanguages();
-        console.log("Supported languages: [" + languages +"]");
+        console.log("Supported languages: [" + languages + "]");
 
-        // Example 8: Detect language of a given text
+        // Example 9: Detect language of a given text
         console.log("=== Language Detection ===");
         const detectionResult1 = await lara.detect("¿Cómo estás?");
         console.log("Text: ¿Cómo estás?");
         console.log("Detected Language: " + detectionResult1.language + " with content type " + detectionResult1.contentType + "\n");
 
-        // Example 9: Detect language with hint and passlist
+        // Example 10: Detect language with hint and passlist
         console.log("=== Language Detection with Hint and Passlist ===");
         const detectionResult2 = await lara.detect("Ciao", "it", ["it", "fr"]);
         console.log("Text: Ciao");
@@ -110,4 +130,4 @@ async function main() {
     }
 }
 
-main(); 
+main();
