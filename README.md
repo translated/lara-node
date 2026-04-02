@@ -11,6 +11,7 @@ All major translation features are accessible, making it easy to integrate and c
 - **Text Translation**: Single strings, multiple strings, and complex text blocks
 - **Document Translation**: Word, PDF, and other document formats with status monitoring
 - **Image Translation**: Translate whole images or extract and translate text blocks
+- **Audio Translation**: Translate audio files with status monitoring
 - **Translation Memory**: Store and reuse translations for consistency
 - **Glossaries**: Enforce terminology standards across translations
 - **Language Detection**: Automatic source language identification
@@ -101,6 +102,17 @@ node document_translation.js
 ```bash
 cd examples
 node image_translation.js
+```
+
+### Audio Translation
+- **[audio_translation.js](examples/audio_translation.js)** - Audio translation examples
+  - Basic audio translation
+  - Advanced options with memories and glossaries
+  - Step-by-step audio translation with status monitoring
+
+```bash
+cd examples
+node audio_translation.js
 ```
 
 ### Translation Memory Management
@@ -275,6 +287,43 @@ const textBlocks = await lara.images.translateText(imageStream, "en", "fr", {
     adaptTo: ["mem_1A2b3C4d5E6f7G8h9I0jKl"],
     glossaries: ["gls_1A2b3C4d5E6f7G8h9I0jKl"],
 });
+```
+
+### 🔊 Audio Translation
+#### Simple audio translation
+
+```javascript
+const fs = require("fs");
+
+const fileStream = fs.createReadStream("/path/to/your/audio.mp3");  // Replace with actual file path
+const translatedStream = await lara.audio.translate(fileStream, "audio.mp3", "en-US", "de-DE");
+
+// With options
+const options = {
+    adaptTo: ["mem_1A2b3C4d5E6f7G8h9I0jKl"],  // Replace with actual memory IDs
+    glossaries: ["gls_1A2b3C4d5E6f7G8h9I0jKl"]  // Replace with actual glossary IDs
+};
+
+const translatedStream = await lara.audio.translate(fileStream, "audio.mp3", "en-US", "de-DE", options);
+```
+### Audio translation with status monitoring
+#### Audio upload
+```javascript
+// Optional: upload options
+const uploadOptions = {
+    adaptTo: ["mem_1A2b3C4d5E6f7G8h9I0jKl"],  // Replace with actual memory IDs
+    glossaries: ["gls_1A2b3C4d5E6f7G8h9I0jKl"]  // Replace with actual glossary IDs
+};
+
+const audio = await lara.audio.upload(fileStream, "audio.mp3", "en-US", "de-DE", uploadOptions);
+```
+#### Audio translation status monitoring
+```javascript
+const status = await lara.audio.status(audio.id);
+```
+#### Download translated audio
+```javascript
+const translatedStream = await lara.audio.download(audio.id);
 ```
 
 ### 🧠 Memory Management
