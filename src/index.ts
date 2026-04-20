@@ -37,10 +37,16 @@ export {
 export { MultiPartFile } from "./net/lara/client";
 export type { LaraStream } from "./net/s3/laraStream";
 export {
+    Styleguide,
+    Styleguides
+} from "./styleguides";
+export {
     DetectResult,
     NGGlossaryMatch,
     NGMemoryMatch,
     QualityEstimationResult,
+    StyleguideChange,
+    StyleguideResults,
     TextBlock,
     TextResult,
     TranslateOptions,

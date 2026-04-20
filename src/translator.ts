@@ -5,6 +5,7 @@ import { Glossaries } from "./glossaries";
 import { ImageTranslator } from "./imageTranslator";
 import { Memories } from "./memories";
 import createClient, { HttpClient, type LaraClient } from "./net/lara";
+import { Styleguides } from "./styleguides";
 import { DEFAULT_BASE_URL } from "./utils/defaultBaseUrl";
 import { version } from "./utils/sdk-version";
 
@@ -45,6 +46,18 @@ export interface TextBlock {
     readonly translatable?: boolean;
 }
 
+export type StyleguideChange = {
+    id?: string;
+    originalTranslation: string;
+    refinedTranslation: string;
+    explanation: string;
+};
+
+export type StyleguideResults<T extends string | string[] | TextBlock[]> = {
+    originalTranslation: T;
+    changes: StyleguideChange[];
+};
+
 export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly contentType: string;
     readonly sourceLanguage: string;
@@ -54,6 +67,7 @@ export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly adaptedToMatches?: NGMemoryMatch[] | NGMemoryMatch[][];
     readonly glossariesMatches?: NGGlossaryMatch[] | NGGlossaryMatch[][];
     readonly profanities?: ProfanityDetectResult | ProfanityDetectResult[];
+    readonly styleguideResults?: StyleguideResults<T>;
 }
 
 export type TranslateOptions = {
@@ -74,6 +88,9 @@ export type TranslateOptions = {
     reasoning?: boolean;
     metadata?: string | Record<string, unknown>;
     profanityFilter?: ProfanityFilter;
+    styleguideId?: string;
+    styleguideReasoning?: boolean;
+    styleguideExplanationLanguage?: string;
 };
 
 export type TranslationStyle = "faithful" | "fluid" | "creative";
@@ -97,6 +114,7 @@ export class Translator {
     public readonly memories: Memories;
     public readonly documents: Documents;
     public readonly glossaries: Glossaries;
+    public readonly styleguides: Styleguides;
     public readonly audio: AudioTranslator;
     public readonly images: ImageTranslator;
 
@@ -105,6 +123,7 @@ export class Translator {
         this.memories = new Memories(this.client);
         this.documents = new Documents(this.client);
         this.glossaries = new Glossaries(this.client);
+        this.styleguides = new Styleguides(this.client);
         this.audio = new AudioTranslator(this.client);
         this.images = new ImageTranslator(this.client);
     }
@@ -156,7 +175,10 @@ export class Translator {
                 style: options?.style,
                 reasoning: options?.reasoning,
                 metadata: options?.metadata,
-                profanity_filter: options?.profanityFilter
+                profanity_filter: options?.profanityFilter,
+                styleguide_id: options?.styleguideId,
+                styleguide_reasoning: options?.styleguideReasoning,
+                styleguide_explanation_language: options?.styleguideExplanationLanguage
             },
             undefined,
             headers
