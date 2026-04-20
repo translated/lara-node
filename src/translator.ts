@@ -79,6 +79,10 @@ export type TranslateOptions = {
 export type TranslationStyle = "faithful" | "fluid" | "creative";
 
 export type ProfanityFilter = "detect" | "avoid" | "hide";
+export interface QualityEstimationResult {
+    score: number;
+}
+
 export interface DetectResult {
     language: string;
     contentType: string;
@@ -183,6 +187,23 @@ export class Translator {
             language,
             content_type: contentType
         });
+    }
+
+    async qualityEstimation(
+        source: string,
+        target: string,
+        sentence: string | string[],
+        translation: string | string[]
+    ): Promise<QualityEstimationResult | QualityEstimationResult[]> {
+        return await this.client.post<QualityEstimationResult | QualityEstimationResult[]>(
+            "/v2/detect/quality-estimation",
+            {
+                source,
+                target,
+                sentence,
+                translation
+            }
+        );
     }
 
     static async getLoginUrl(serverUrl?: string): Promise<string> {

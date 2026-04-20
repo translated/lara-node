@@ -40,6 +40,7 @@ export {
     DetectResult,
     NGGlossaryMatch,
     NGMemoryMatch,
+    QualityEstimationResult,
     TextBlock,
     TextResult,
     TranslateOptions,

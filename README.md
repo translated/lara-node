@@ -231,6 +231,30 @@ const detected = await lara.detect(
 console.log(detected.language); // es
 ```
 
+#### Quality Estimation
+
+Use `qualityEstimation()` to score how well a translation matches its source. Pass a single sentence/translation pair to get a single result, or two parallel arrays to get one result per pair.
+
+```javascript
+// Single pair
+const single = await lara.qualityEstimation(
+  "en-US",
+  "it-IT",
+  "Hello, how are you today?",
+  "Ciao, come stai oggi?"
+);
+console.log(single.score); // e.g. 0.768
+
+// Batch
+const batch = await lara.qualityEstimation(
+  "en-US",
+  "it-IT",
+  ["Good morning.", "The weather is nice."],
+  ["Buongiorno.", "Il tempo è bello."]
+);
+console.log(batch.map(r => r.score)); // e.g. [0.751, 0.713]
+```
+
 ### 📖 Document Translation
 #### Simple document translation
 

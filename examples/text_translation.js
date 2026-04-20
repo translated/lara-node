@@ -125,6 +125,24 @@ async function main() {
         console.log("Text: Ciao");
         console.log("Detected Language: " + detectionResult2.language + " with content type " + detectionResult2.contentType + "\n");
 
+        // Example 11: Quality estimation for a single sentence pair
+        console.log("=== Quality Estimation: single sentence ===");
+        const qeSingle = await lara.qualityEstimation(
+            "en-US", "it-IT",
+            "Hello, how are you today?",
+            "Ciao, come stai oggi?"
+        );
+        console.log("Score: " + qeSingle.score + "\n");
+
+        // Example 12: Quality estimation for a batch of sentence pairs
+        console.log("=== Quality Estimation: batch ===");
+        const qeBatch = await lara.qualityEstimation(
+            "en-US", "it-IT",
+            ["Good morning.", "The weather is nice."],
+            ["Buongiorno.", "Il tempo è bello."]
+        );
+        console.log("Scores: " + qeBatch.map(r => r.score).join(", ") + "\n");
+
     } catch (error) {
         console.error("Error:", error.message);
     }
