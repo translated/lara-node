@@ -39,6 +39,12 @@ export interface ProfanityDetectResult {
         endCharIndex: number;
         score: number;
     }[];
+    error?: string;
+}
+
+export interface ProfanitiesResult {
+    target: ProfanityDetectResult | ProfanityDetectResult[];
+    source?: ProfanityDetectResult | ProfanityDetectResult[];
 }
 
 export interface TextBlock {
@@ -66,7 +72,7 @@ export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly glossaries?: string[];
     readonly adaptedToMatches?: NGMemoryMatch[] | NGMemoryMatch[][];
     readonly glossariesMatches?: NGGlossaryMatch[] | NGGlossaryMatch[][];
-    readonly profanities?: ProfanityDetectResult | ProfanityDetectResult[];
+    readonly profanities?: ProfanitiesResult;
     readonly styleguideResults?: StyleguideResults<T>;
 }
 
@@ -87,7 +93,8 @@ export type TranslateOptions = {
     style?: TranslationStyle;
     reasoning?: boolean;
     metadata?: string | Record<string, unknown>;
-    profanityFilter?: ProfanityFilter;
+    profanitiesDetect?: ProfanitiesDetect;
+    profanitiesHandling?: ProfanitiesHandling;
     styleguideId?: string;
     styleguideReasoning?: boolean;
     styleguideExplanationLanguage?: string;
@@ -95,11 +102,11 @@ export type TranslateOptions = {
 
 export type TranslationStyle = "faithful" | "fluid" | "creative";
 
-export type ProfanityFilter = "detect" | "avoid" | "hide";
+export type ProfanitiesDetect = "target" | "source_target";
+export type ProfanitiesHandling = "hide" | "avoid" | "detect";
 export interface QualityEstimationResult {
     score: number;
 }
-
 export interface DetectResult {
     language: string;
     contentType: string;
@@ -175,7 +182,8 @@ export class Translator {
                 style: options?.style,
                 reasoning: options?.reasoning,
                 metadata: options?.metadata,
-                profanity_filter: options?.profanityFilter,
+                profanities_detect: options?.profanitiesDetect,
+                profanities_handling: options?.profanitiesHandling,
                 styleguide_id: options?.styleguideId,
                 styleguide_reasoning: options?.styleguideReasoning,
                 styleguide_explanation_language: options?.styleguideExplanationLanguage

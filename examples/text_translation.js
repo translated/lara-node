@@ -88,25 +88,22 @@ async function main() {
         console.log("Original: This is a comprehensive translation example");
         console.log("Italian (with all options): " + result6.translation + "\n");
 
-        // Example 7: Profanity filter options
-        console.log("=== Translation with Profanity Filter Options ===");
+        // Example 7: Profanities detection and handling options
+        console.log("=== Translation with Profanities Detection and Handling Options ===");
         const profanityText = "Don't be such a tool.";
         const detectResult = await lara.translate(profanityText, "en-US", "it-IT", {
-            profanityFilter: "detect",
+            profanitiesDetect: "source_target",
+            profanitiesHandling: "detect",
             verbose: true
         });
         const hideResult = await lara.translate(profanityText, "en-US", "it-IT", {
-            profanityFilter: "hide",
-            verbose: true
-        });
-        const avoidResult = await lara.translate(profanityText, "en-US", "it-IT", {
-            profanityFilter: "avoid",
+            profanitiesDetect: "target",
+            profanitiesHandling: "hide",
             verbose: true
         });
         console.log("Original: " + profanityText);
         console.log("Detect mode translation: " + detectResult.translation);
         console.log("Hide mode translation: " + hideResult.translation);
-        console.log("Avoid mode translation: " + avoidResult.translation + "\n");
 
         // Example 8: Get available languages
         console.log("=== Available Languages ===");

@@ -44,6 +44,8 @@ export {
     DetectResult,
     NGGlossaryMatch,
     NGMemoryMatch,
+    ProfanitiesResult,
+    ProfanityDetectResult,
     QualityEstimationResult,
     StyleguideChange,
     StyleguideResults,
