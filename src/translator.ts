@@ -163,7 +163,7 @@ export class Translator {
         }
 
         const response = this.client.postAndGetStream<TextResult<T>>(
-            "/translate",
+            "/v2/translate",
             {
                 q: text,
                 source,

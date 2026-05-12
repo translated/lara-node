@@ -166,7 +166,7 @@ export abstract class LaraClient {
                 throw this.createApiError(chunk);
             }
 
-            yield parseContent(chunk.body.content || chunk.body) as T;
+            yield parseContent(chunk.body) as T;
         }
     }
 
