@@ -8,6 +8,7 @@ export interface Glossary {
     readonly ownerId: string;
     readonly createdAt: Date;
     readonly updatedAt: Date;
+    readonly isPersonal: boolean;
 }
 
 export interface GlossaryImport {

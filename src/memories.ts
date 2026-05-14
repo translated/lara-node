@@ -12,6 +12,7 @@ export interface Memory {
     readonly secret?: string;
     readonly ownerId: string;
     readonly collaboratorsCount: number;
+    readonly isPersonal: boolean;
 }
 
 export interface MemoryImport {
