@@ -384,7 +384,7 @@ export abstract class LaraClient {
     }
 
     private createApiError(response: ClientResponse): LaraApiError {
-        const error = response.body?.error || response.body || {};
+        const error = response.body || {};
         return new LaraApiError(
             response.statusCode,
             error.type || "UnknownError",
