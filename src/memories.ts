@@ -74,16 +74,43 @@ export class Memories {
         return (Array.isArray(ids) ? memories : memories[0]) as T extends string ? Memory : Memory[];
     }
 
-    async importTmx(id: string, tmx: MultiPartFile, gzip: boolean = false): Promise<MemoryImport> {
+    async importTmx(id: string, tmx: MultiPartFile): Promise<MemoryImport>;
+    async importTmx(id: string, tmx: MultiPartFile, gzip: boolean): Promise<MemoryImport>;
+    async importTmx(id: string, tmx: MultiPartFile, callbackUrl: string): Promise<MemoryImport>;
+    async importTmx(id: string, tmx: MultiPartFile, gzip: boolean, callbackUrl: string): Promise<MemoryImport>;
+    async importTmx(
+        id: string,
+        tmx: MultiPartFile,
+        gzipOrCallbackUrl?: boolean | string,
+        maybeCallbackUrl?: string
+    ): Promise<MemoryImport> {
+        let gzip: boolean = false;
+        let callbackUrl: string | undefined;
+
+        if (typeof gzipOrCallbackUrl === "boolean") {
+            gzip = gzipOrCallbackUrl;
+            callbackUrl = maybeCallbackUrl;
+        } else if (typeof gzipOrCallbackUrl === "string") {
+            callbackUrl = gzipOrCallbackUrl;
+        }
+
         return await this.client.post<MemoryImport>(
             `/v2/memories/${id}/import`,
             {
-                compression: gzip ? "gzip" : undefined
+                compression: gzip ? "gzip" : undefined,
+                callback_url: callbackUrl
             },
             {
                 tmx
             }
         );
+    }
+
+    async exportAsync(id: string, callbackUrl: string, format?: "tmx" | "jtm"): Promise<{ jobId: string }> {
+        return await this.client.get<{ jobId: string }>(`/v2/memories/${id}/export/async`, {
+            callback_url: callbackUrl,
+            format
+        });
     }
 
     async addTranslation(

@@ -10,6 +10,8 @@ const path = require("path");
  * - Add individual translations
  * - Multiple memory operations
  * - TMX file import with progress monitoring
+ * - TMX import with a callback URL (async notification)
+ * - Async memory export with callback URL
  * - Translation deletion
  * - Translation with TUID and context
  */
@@ -121,7 +123,38 @@ async function main() {
             console.log(`TMX file not found: ${tmxFilePath}`);
         }
 
-        // Example 5: Translation deletion
+        // Example 5: TMX import with a callback URL (async notification when import completes)
+        console.log("=== TMX Import with Callback URL ===");
+        if (fs.existsSync(tmxFilePath)) {
+            try {
+                const callbackUrl = "https://your-server.example.com/lara/import-callback"; // Replace with your endpoint
+                const tmxImportWithCallback = await lara.memories.importTmx(memoryId, tmxFilePath, callbackUrl);
+                console.log(`Import started with ID: ${tmxImportWithCallback.id} (callback: ${callbackUrl})`);
+
+                // You can also combine gzip + callbackUrl:
+                // await lara.memories.importTmx(memoryId, tmxFilePath, true, callbackUrl);
+                console.log();
+            } catch (error) {
+                console.log(`Error starting TMX import with callback: ${error.message}\n`);
+            }
+        } else {
+            console.log(`TMX file not found: ${tmxFilePath}\n`);
+        }
+
+        // Example 6: Async memory export
+        // Starts an export job; the result is delivered asynchronously to the provided callback URL.
+        console.log("=== Async Memory Export ===");
+        try {
+            const exportCallbackUrl = "https://your-server.example.com/lara/export-callback"; // Replace with your endpoint
+            const exportJob = await lara.memories.exportAsync(memoryId, exportCallbackUrl, "tmx");
+            console.log(`✅ Export job started (Job ID: ${exportJob.jobId})`);
+            console.log(`The export result will be delivered to: ${exportCallbackUrl}`);
+            console.log();
+        } catch (error) {
+            console.log(`Error starting async export: ${error.message}\n`);
+        }
+
+        // Example 7: Translation deletion
         console.log("=== Translation Deletion ===");
         try {
             // Delete a specific translation unit (with TUID)

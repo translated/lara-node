@@ -376,6 +376,31 @@ const memoryImport = await lara.memories.addTranslation(
 const tmxFileStream = fs.createReadStream("/path/to/your/memory.tmx");  // Replace with actual TMX file path
 const memoryImport = await lara.memories.importTmx("mem_1A2b3C4d5E6f7G8h9I0jKl", tmxFileStream);
 
+// TMX import with gzip compression
+const memoryImport = await lara.memories.importTmx("mem_1A2b3C4d5E6f7G8h9I0jKl", tmxFileStream, true);
+
+// TMX import with a callback URL (notified when the import completes)
+const memoryImport = await lara.memories.importTmx(
+    "mem_1A2b3C4d5E6f7G8h9I0jKl",
+    tmxFileStream,
+    "https://your-server.example.com/lara/import-callback"
+);
+
+// TMX import with both gzip compression and a callback URL
+const memoryImport = await lara.memories.importTmx(
+    "mem_1A2b3C4d5E6f7G8h9I0jKl",
+    tmxFileStream,
+    true,
+    "https://your-server.example.com/lara/import-callback"
+);
+
+// Async memory export — returns a jobId; the result is delivered to your callback URL when ready
+const { jobId } = await lara.memories.exportAsync(
+    "mem_1A2b3C4d5E6f7G8h9I0jKl",
+    "https://your-server.example.com/lara/export-callback",
+    "tmx" // optional, defaults to the server-side default ("tmx" | "jtm")
+);
+
 // Delete translation
 // Important: if you omit tuid, all entries that match the provided fields will be removed
 const deleteJob = await lara.memories.deleteTranslation(
