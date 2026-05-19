@@ -8,6 +8,7 @@ export interface Styleguide {
     ownerId: string;
     createdAt: Date;
     updatedAt: Date;
+    isPersonal: boolean;
 }
 
 export class Styleguides {
