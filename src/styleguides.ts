@@ -32,4 +32,16 @@ export class Styleguides {
             throw e;
         }
     }
+
+    async create(name: string, content: string): Promise<Styleguide> {
+        return await this.client.post<Styleguide>("/v2/styleguides", { name, content });
+    }
+
+    async update(id: string, name: string | undefined, content?: string): Promise<Styleguide> {
+        return await this.client.put<Styleguide>(`/v2/styleguides/${id}`, { name, content });
+    }
+
+    async delete(id: string): Promise<Styleguide> {
+        return await this.client.delete<Styleguide>(`/v2/styleguides/${id}`);
+    }
 }

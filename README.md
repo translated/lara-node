@@ -14,6 +14,7 @@ All major translation features are accessible, making it easy to integrate and c
 - **Audio Translation**: Translate audio files with status monitoring
 - **Translation Memory**: Store and reuse translations for consistency
 - **Glossaries**: Enforce terminology standards across translations
+- **Styleguides**: Define tone, voice, and writing style rules for translations
 - **Language Detection**: Automatic source language identification
 - **Advanced Options**: Translation instructions and more
 
@@ -140,6 +141,17 @@ node memories_management.js
 ```bash
 cd examples
 node glossaries_management.js
+```
+
+### Styleguide Management
+- **[styleguide_management.js](examples/styleguide_management.js)** - Styleguide management examples
+  - Create, list, get, update, delete styleguides
+  - Update name, content, or both at once
+  - Handling of non-existent styleguides
+
+```bash
+cd examples
+node styleguide_management.js
 ```
 
 ## 🔧 API Reference
@@ -432,6 +444,43 @@ const csvData = await lara.glossaries.export("gls_1A2b3C4d5E6f7G8h9I0jKl", "csv/
 
 // Get glossary terms count
 const counts = await lara.glossaries.counts("gls_1A2b3C4d5E6f7G8h9I0jKl");
+```
+
+### 📘 Styleguide Management
+
+```javascript
+// Create styleguide
+const styleguide = await lara.styleguides.create(
+    "MyStyleguide",
+    "Use a formal tone. Prefer British English spelling. Avoid contractions."
+);
+
+// List all styleguides
+const styleguides = await lara.styleguides.list();
+
+// Get a styleguide by ID (returns null if not found)
+const retrieved = await lara.styleguides.get("stg_1A2b3C4d5E6f7G8h9I0jKl");
+
+// Update a styleguide — pass undefined for fields you don't want to change
+// Update only the name
+const renamed = await lara.styleguides.update("stg_1A2b3C4d5E6f7G8h9I0jKl", "UpdatedName", undefined);
+
+// Update only the content
+const updatedContent = await lara.styleguides.update(
+    "stg_1A2b3C4d5E6f7G8h9I0jKl",
+    undefined,
+    "Use a casual tone. Prefer American English spelling."
+);
+
+// Update both name and content
+const updated = await lara.styleguides.update(
+    "stg_1A2b3C4d5E6f7G8h9I0jKl",
+    "FinalName",
+    "Use clear and concise language. Avoid jargon."
+);
+
+// Delete a styleguide
+await lara.styleguides.delete("stg_1A2b3C4d5E6f7G8h9I0jKl");
 ```
 
 ### Translation Options
