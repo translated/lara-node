@@ -27,7 +27,9 @@ export type ImageTextTranslationOptions = {
 
 export type ImageTranslationOptions = Omit<
     ImageTextTranslationOptions & {
+        /** @deprecated Use `model` instead. */
         textRemoval?: "overlay" | "inpainting";
+        model?: "overlay" | "inpainting" | "generative" | "generative_fast";
     },
     "verbose"
 >;
@@ -56,7 +58,7 @@ export class ImageTranslator {
                 adapt_to: JSON.stringify(options?.adaptTo),
                 glossaries: JSON.stringify(options?.glossaries),
                 style: options?.style,
-                text_removal: options?.textRemoval
+                model: options?.model ?? options?.textRemoval
             },
             {
                 image: file

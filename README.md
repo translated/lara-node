@@ -302,7 +302,7 @@ const imageStream = fs.createReadStream("/path/to/your/image.png"); // Replace w
 
 // Translate image and receive a translated image stream
 const translatedImageStream = await lara.images.translate(imageStream, "en", "fr", {
-    textRemoval: "inpainting",
+    model: "inpainting",
     style: "faithful"
 });
 

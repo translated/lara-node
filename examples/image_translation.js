@@ -41,7 +41,7 @@ async function main() {
   try {
     const fileStream = fs.createReadStream(sampleFilePath);
     const translatedStream = await lara.images.translate(fileStream, sourceLang, targetLang, {
-      textRemoval: "overlay"
+      model: "overlay"
     });
 
     const outputPath = path.join(__dirname, "sample_image_translated.png");
@@ -69,7 +69,7 @@ async function main() {
       adaptTo: ["mem_1A2b3C4d5E6f7G8h9I0jKl"],
       glossaries: ["gls_1A2b3C4d5E6f7G8h9I0jKl"],
       style: "faithful",
-      textRemoval: "inpainting"
+      model: "inpainting"
     });
 
     const outputPath = path.join(__dirname, "advanced_image_translated.png");
