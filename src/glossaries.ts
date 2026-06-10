@@ -65,37 +65,43 @@ export class Glossaries {
         return await this.client.put<Glossary>(`/v2/glossaries/${id}`, { name });
     }
 
-    async importCsv(id: string, csv: MultiPartFile, gzip?: boolean): Promise<GlossaryImport>;
+    async importCsv(id: string, csv: MultiPartFile, gzip?: boolean, callbackUrl?: string): Promise<GlossaryImport>;
     async importCsv(
         id: string,
         csv: MultiPartFile,
         contentType: GlossaryFileFormat,
-        gzip?: boolean
+        gzip?: boolean,
+        callbackUrl?: string
     ): Promise<GlossaryImport>;
     async importCsv(
         id: string,
         csv: MultiPartFile,
         gzipOrContentType?: boolean | GlossaryFileFormat,
-        maybeGzip?: boolean
+        maybeGzipOrCallbackUrl?: boolean | string,
+        maybeCallbackUrl?: string
     ): Promise<GlossaryImport> {
         // Default values when no content type or gzip flag is provided
         let gzip: boolean = false;
         let contentType: GlossaryFileFormat = "csv/table-uni";
+        let callbackUrl: string | undefined;
 
         if (typeof gzipOrContentType === "boolean") {
-            // First overload: (id, csv, gzip)
+            // First overload: (id, csv, gzip, callbackUrl)
             gzip = gzipOrContentType;
+            callbackUrl = typeof maybeGzipOrCallbackUrl === "string" ? maybeGzipOrCallbackUrl : undefined;
         } else if (typeof gzipOrContentType === "string") {
-            // Second overload: (id, csv, contentType, gzip)
+            // Second overload: (id, csv, contentType, gzip, callbackUrl)
             contentType = gzipOrContentType;
-            gzip = maybeGzip ?? false;
+            gzip = typeof maybeGzipOrCallbackUrl === "boolean" ? maybeGzipOrCallbackUrl : false;
+            callbackUrl = maybeCallbackUrl;
         }
 
         return await this.client.post<GlossaryImport>(
             `/v2/glossaries/${id}/import`,
             {
                 compression: gzip ? "gzip" : undefined,
-                content_type: contentType
+                content_type: contentType,
+                callback_url: callbackUrl
             },
             {
                 csv
@@ -131,6 +137,14 @@ export class Glossaries {
 
     async export(id: string, contentType: GlossaryFileFormat, source?: string): Promise<string> {
         return await this.client.get(`/v2/glossaries/${id}/export`, {
+            content_type: contentType,
+            source
+        });
+    }
+
+    async exportAsync(id: string, callbackUrl: string, contentType: GlossaryFileFormat, source?: string): Promise<{ jobId: string }> {
+        return await this.client.get<{ jobId: string }>(`/v2/glossaries/${id}/export/async`, {
+            callback_url: callbackUrl,
             content_type: contentType,
             source
         });

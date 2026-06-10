@@ -134,7 +134,7 @@ node memories_management.js
 - **[glossaries_management.js](examples/glossaries_management.js)** - Glossary management examples
   - Create, list, update, delete glossaries
   - CSV import with status monitoring
-  - Glossary export
+  - Glossary export (sync and async)
   - Glossary terms count
   - Import status checking
 
@@ -441,6 +441,14 @@ const completedImport = await lara.glossaries.waitForImport(glossaryImport, unde
 
 // Export glossary
 const csvData = await lara.glossaries.export("gls_1A2b3C4d5E6f7G8h9I0jKl", "csv/table-uni", "en-US");
+
+// Async glossary export — returns a jobId; the result is delivered to your callback URL when ready
+const { jobId } = await lara.glossaries.exportAsync(
+    "gls_1A2b3C4d5E6f7G8h9I0jKl",
+    "https://your-server.example.com/lara/export-callback",
+    "csv/table-uni",
+    "en-US"
+);
 
 // Get glossary terms count
 const counts = await lara.glossaries.counts("gls_1A2b3C4d5E6f7G8h9I0jKl");

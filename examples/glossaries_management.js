@@ -8,7 +8,7 @@ const path = require("path");
  * This example demonstrates:
  * - Create, list, update, delete glossaries
  * - CSV import with status monitoring
- * - Glossary export
+ * - Glossary export (sync and async)
  * - Glossary terms count
  * - Import status checking
  * - Add or replace glossary entries
@@ -94,7 +94,25 @@ async function main() {
             console.log(`CSV file not found: ${csvFilePath}`);
         }
 
-        // Example 4: Export functionality
+        // Example 4: CSV import with a callback URL (async notification when import completes)
+        console.log("=== CSV Import with Callback URL ===");
+        if (fs.existsSync(csvFilePath)) {
+            try {
+                const callbackUrl = "https://your-server.example.com/lara/import-callback"; // Replace with your endpoint
+                // Note: the callback URL must follow the gzip flag (importCsv has no callback-only overload),
+                // so pass gzip explicitly even when you don't need compression.
+                const importWithCallback = await lara.glossaries.importCsv(glossaryId, csvFilePath, false, callbackUrl);
+                console.log(`Import started with ID: ${importWithCallback.id} (callback: ${callbackUrl})`);
+
+                // You can also combine a content type + gzip + callbackUrl:
+                // await lara.glossaries.importCsv(glossaryId, csvFilePath, "csv/table-uni", true, callbackUrl);
+                console.log();
+            } catch (error) {
+                console.log(`Error starting CSV import with callback: ${error.message}\n`);
+            }
+        }
+
+        // Example 5: Export functionality
         console.log("=== Export Functionality ===");
         try {
             // Export as CSV table unidirectional format
@@ -106,12 +124,23 @@ async function main() {
             const exportFilePath = path.join(__dirname, "exported_glossary.csv");  // Replace with actual path
             fs.writeFileSync(exportFilePath, csvUniData);
             console.log(`💾 Sample export saved to: ${path.basename(exportFilePath)}`);
+
+            // Async export - returns a jobId; the result is delivered to your callback URL when ready
+            console.log("📤 Starting async export...");
+            const { jobId } = await lara.glossaries.exportAsync(
+                glossaryId,
+                "https://your-server.example.com/lara/export-callback",  // Replace with your actual callback URL
+                "csv/table-uni",
+                "en-US"
+            );
+            console.log(`✅ Async export started (job ID: ${jobId})`);
+            console.log("   The export result will be delivered to your callback URL when ready.");
             console.log();
         } catch (error) {
             console.log(`Error with export: ${error.message}\n`);
         }
 
-        // Example 5: Glossary Terms Count
+        // Example 6: Glossary Terms Count
         console.log("=== Glossary Terms Count ===");
         try {
             // Get detailed counts
@@ -138,7 +167,7 @@ async function main() {
             console.log(`Error getting glossary terms count: ${error.message}\n`);
         }
 
-        // Example 6: Add or replace glossary entries
+        // Example 7: Add or replace glossary entries
         console.log("=== Add or Replace Glossary Entries ===");
         try {
             // Add a new entry with multiple language terms
@@ -176,7 +205,7 @@ async function main() {
             console.log(`Error adding/replacing entry: ${error.message}\n`);
         }
 
-        // Example 7: Delete glossary entries
+        // Example 8: Delete glossary entries
         console.log("=== Delete Glossary Entries ===");
         try {
             // Delete an entry by GUID
