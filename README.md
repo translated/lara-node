@@ -18,9 +18,15 @@ All major translation features are accessible, making it easy to integrate and c
 - **Language Detection**: Automatic source language identification
 - **Advanced Options**: Translation instructions and more
 
-## 📚 Documentation
+## 🔑 Getting your API credentials
 
-Lara's SDK full documentation is available at [https://developers.laratranslate.com/](https://developers.laratranslate.com/)
+To use this SDK you need a Lara access key ID and access key secret.
+
+1. Create a Lara account at [laratranslate.com](https://www.laratranslate.com).
+2. Generate your access key ID and secret by following the steps in the [developer documentation](https://developers.laratranslate.com/).
+3. Choose the plan that fits your volume. Lara offers Free, Pro, Team, and Custom plans for teams translating millions of characters per month. See current plans at [laratranslate.com/pricing](http://laratranslate.com/pricing).
+
+Keep your credentials private. Never commit them to source control or expose them in client-side code. Use environment variables instead, as shown throughout this guide.
 
 ## 🚀 Quick Start
 
