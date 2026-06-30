@@ -170,7 +170,7 @@ export class Translator {
                 target,
                 source_hint: options?.sourceHint,
                 content_type: options?.contentType,
-                multiline: options?.multiline !== false,
+                multiline: options?.multiline,
                 adapt_to: options?.adaptTo,
                 glossaries: options?.glossaries,
                 instructions: options?.instructions,
