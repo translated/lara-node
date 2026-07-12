@@ -373,10 +373,15 @@ export abstract class LaraClient {
     private handleAuthResponse(response: ClientResponse): void {
         if (this.isSuccessResponse(response)) {
             this.token = response.body.token;
+
+            // Refresh tokens are single-use and rotated on every successful refresh, so a token is consumed
+            // once presented. If the auth service does not return a new refresh token, invalidate the previous
+            // one instead of keeping it: replaying an already-rotated token can trip server-side reuse
+            // detection and revoke the session. With no refresh token, the next renewal falls back to the
+            // access key (or fails cleanly for token-only clients).
             const newRefreshToken = response.headers["x-lara-refresh-token"] as string | undefined;
-            if (newRefreshToken) {
-                this.refreshToken = newRefreshToken;
-            }
+            this.refreshToken = newRefreshToken || undefined;
+
             return;
         }
 
