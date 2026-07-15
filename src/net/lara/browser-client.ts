@@ -11,8 +11,14 @@ export class BrowserLaraClient extends LaraClient {
     private readonly baseUrl: string;
     private readonly timeout: number | undefined;
 
-    constructor(baseUrl: BaseURL, auth: AccessKey | AuthToken, _keepAlive: boolean, timeout?: number) {
-        super(auth);
+    constructor(
+        baseUrl: BaseURL,
+        auth: AccessKey | AuthToken,
+        _keepAlive: boolean,
+        timeout?: number,
+        sessionId?: string
+    ) {
+        super(auth, sessionId);
 
         let url = `${baseUrl.secure ? "https" : "http"}://${baseUrl.hostname}`;
         if (!hasDefaultPort(baseUrl.port, baseUrl.secure)) url += `:${baseUrl.port}`;

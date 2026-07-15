@@ -14,8 +14,14 @@ export class NodeLaraClient extends LaraClient {
     private readonly agent: http.Agent | https.Agent;
     private readonly timeout: number | undefined;
 
-    constructor(baseUrl: BaseURL, auth: AccessKey | AuthToken, keepAlive: boolean, timeout?: number) {
-        super(auth);
+    constructor(
+        baseUrl: BaseURL,
+        auth: AccessKey | AuthToken,
+        keepAlive: boolean,
+        timeout?: number,
+        sessionId?: string
+    ) {
+        super(auth, sessionId);
         this.baseUrl = baseUrl;
         this.agent = baseUrl.secure ? new https.Agent({ keepAlive }) : new http.Agent({ keepAlive });
         this.timeout = timeout;

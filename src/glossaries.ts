@@ -142,7 +142,12 @@ export class Glossaries {
         });
     }
 
-    async exportAsync(id: string, callbackUrl: string, contentType: GlossaryFileFormat, source?: string): Promise<{ jobId: string }> {
+    async exportAsync(
+        id: string,
+        callbackUrl: string,
+        contentType: GlossaryFileFormat,
+        source?: string
+    ): Promise<{ jobId: string }> {
         return await this.client.get<{ jobId: string }>(`/v2/glossaries/${id}/export/async`, {
             callback_url: callbackUrl,
             content_type: contentType,

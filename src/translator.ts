@@ -13,6 +13,7 @@ export type TranslatorOptions = {
     serverUrl?: string;
     connectionTimeoutMs?: number;
     keepAlive?: boolean;
+    sessionId?: string;
 };
 
 export interface NGMemoryMatch {
@@ -126,7 +127,13 @@ export class Translator {
     public readonly images: ImageTranslator;
 
     constructor(auth: AccessKey | AuthToken, options?: TranslatorOptions) {
-        this.client = createClient(auth, options?.serverUrl, options?.keepAlive, options?.connectionTimeoutMs);
+        this.client = createClient(
+            auth,
+            options?.serverUrl,
+            options?.keepAlive,
+            options?.connectionTimeoutMs,
+            options?.sessionId
+        );
         this.memories = new Memories(this.client);
         this.documents = new Documents(this.client);
         this.glossaries = new Glossaries(this.client);

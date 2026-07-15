@@ -38,7 +38,10 @@ export abstract class LaraClient {
     private authenticationPromise?: Promise<void>;
     private refreshPromise?: Promise<void>;
 
-    protected constructor(auth: AccessKey | AuthToken) {
+    // Session id sent on every access-key authentication request (never on token refresh).
+    private readonly authSessionId?: string;
+
+    protected constructor(auth: AccessKey | AuthToken, sessionId?: string) {
         if (auth instanceof AccessKey) {
             this.accessKey = auth;
         } else if (auth instanceof AuthToken) {
@@ -46,6 +49,8 @@ export abstract class LaraClient {
         } else {
             throw new Error("Invalid authentication method provided");
         }
+
+        this.authSessionId = sessionId;
     }
 
     setExtraHeader(name: string, value: string): void {
@@ -298,9 +303,21 @@ export abstract class LaraClient {
         };
 
         headers.Authorization = `Lara:${await this.sign("POST", "/v2/auth", headers)}`;
+        this.applySessionHeader(headers);
 
         const response = await this.send("POST", "/v2/auth", headers, body);
         this.handleAuthResponse(response);
+    }
+
+    /**
+     * Adds the session id header to the access-key authentication request. The header is only
+     * parsed on the "/v2/auth" endpoint, so it is never attached to token refresh requests.
+     * The value is preserved for the lifetime of the client, so every access-key
+     * (re-)authentication carries it.
+     */
+    private applySessionHeader(headers: Record<string, string>): void {
+        if (!this.authSessionId) return;
+        headers["X-Lara-Auth-Session-Id"] = this.authSessionId;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

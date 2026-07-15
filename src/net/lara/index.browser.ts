@@ -9,7 +9,8 @@ export default function create(
     auth: AccessKey | AuthToken,
     baseUrl?: string,
     keepAlive?: boolean,
-    timeout?: number
+    timeout?: number,
+    sessionId?: string
 ): LaraClient {
     const url = new URL(baseUrl || DEFAULT_BASE_URL);
 
@@ -22,7 +23,7 @@ export default function create(
         port: url.port ? parseInt(url.port, 10) : url.protocol === "https:" ? 443 : 80
     };
 
-    return new BrowserLaraClient(parsedURL, auth, keepAlive ?? true, timeout);
+    return new BrowserLaraClient(parsedURL, auth, keepAlive ?? true, timeout, sessionId);
 }
 
 export { BrowserClient as HttpClient } from "./browser-client";
