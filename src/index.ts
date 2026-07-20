@@ -1,6 +1,10 @@
 export {
     Audio,
     AudioStatus,
+    AudioTextResult,
+    AudioTextSegment,
+    AudioTranscriptOptions,
+    AudioTranscriptUploadOptions,
     AudioTranslator,
     AudioUploadOptions,
     VoiceGender

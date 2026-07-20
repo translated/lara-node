@@ -56,6 +56,29 @@ export interface Audio {
     readonly errorReason?: string;
 }
 
+export type AudioTranscriptOptions = Omit<AudioOptions, "voiceGender">;
+
+export type AudioTranscriptUploadOptions = Omit<AudioUploadOptions, "voiceGender">;
+
+export interface AudioTextSegment {
+    readonly id: number;
+    readonly start: number;
+    readonly end: number;
+    readonly text: string;
+    readonly translation: string;
+}
+
+export interface AudioTextResult {
+    readonly id: string;
+    readonly source: string;
+    readonly target: string;
+    readonly filename: string;
+    readonly duration: number;
+    readonly text: string;
+    readonly translation: string;
+    readonly segments: AudioTextSegment[];
+}
+
 export class AudioTranslator {
     private readonly client: LaraClient;
     private readonly s3Client: BrowserS3Client | NodeS3Client;
@@ -123,6 +146,65 @@ export class AudioTranslator {
             const { status, errorReason } = await this.status(id);
 
             if (status === AudioStatus.TRANSLATED) return await this.download(id);
+            if (status === AudioStatus.ERROR) {
+                throw new LaraApiError(500, "AudioError", errorReason as string);
+            }
+        }
+
+        throw new TimeoutError();
+    }
+
+    public async uploadForTranscription(
+        file: MultiPartFile,
+        filename: string,
+        source: string | null,
+        target: string,
+        options?: AudioTranscriptUploadOptions
+    ): Promise<Audio> {
+        const { url, fields } = await this.client.get<UploadUrlData>(`/v2/audio/upload-url`, { filename });
+
+        await this.s3Client.upload(url, fields, file, options?.contentLength);
+
+        const headers: Record<string, string> = options?.noTrace ? { "X-No-Trace": "true" } : {};
+
+        return this.client.post<Audio>(
+            `/v2/audio/translate-transcript`,
+            {
+                source,
+                target,
+                s3key: fields.key,
+                adapt_to: options?.adaptTo,
+                glossaries: options?.glossaries,
+                style: options?.style
+            },
+            undefined,
+            headers
+        );
+    }
+
+    public async getTranslatedTranscript(id: string): Promise<AudioTextResult> {
+        return await this.client.get<AudioTextResult>(`/v2/audio/${id}/translated-transcript`);
+    }
+
+    public async translateTranscript(
+        file: MultiPartFile,
+        filename: string,
+        source: string | null,
+        target: string,
+        options?: AudioTranscriptUploadOptions
+    ): Promise<AudioTextResult> {
+        const { id } = await this.uploadForTranscription(file, filename, source, target, options);
+
+        const pollingInterval = 2000;
+        const maxWaitTime = 1000 * 60 * 15; // 15 minutes
+        const start = Date.now();
+
+        while (Date.now() - start < maxWaitTime) {
+            await new Promise((resolve) => setTimeout(resolve, pollingInterval));
+
+            const { status, errorReason } = await this.status(id);
+
+            if (status === AudioStatus.TRANSLATED) return await this.getTranslatedTranscript(id);
             if (status === AudioStatus.ERROR) {
                 throw new LaraApiError(500, "AudioError", errorReason as string);
             }
