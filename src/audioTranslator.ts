@@ -34,6 +34,7 @@ export type AudioOptions = {
     glossaries?: string[];
     noTrace?: boolean;
     style?: TranslationStyle;
+    voiceCloning?: boolean;
     voiceGender?: VoiceGender;
 };
 
@@ -56,9 +57,9 @@ export interface Audio {
     readonly errorReason?: string;
 }
 
-export type AudioTranscriptOptions = Omit<AudioOptions, "voiceGender">;
+export type AudioTranscriptOptions = AudioTranscriptUploadOptions;
 
-export type AudioTranscriptUploadOptions = Omit<AudioUploadOptions, "voiceGender">;
+export type AudioTranscriptUploadOptions = Omit<AudioUploadOptions, "voiceCloning" | "voiceGender">;
 
 export interface AudioTextSegment {
     readonly id: number;
@@ -110,6 +111,7 @@ export class AudioTranslator {
                 adapt_to: options?.adaptTo,
                 glossaries: options?.glossaries,
                 style: options?.style,
+                voice_cloning: options?.voiceCloning,
                 voice_gender: options?.voiceGender
             },
             undefined,
@@ -191,7 +193,7 @@ export class AudioTranslator {
         filename: string,
         source: string | null,
         target: string,
-        options?: AudioTranscriptUploadOptions
+        options?: AudioTranscriptOptions
     ): Promise<AudioTextResult> {
         const { id } = await this.uploadForTranscription(file, filename, source, target, options);
 
