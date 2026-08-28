@@ -14,6 +14,7 @@ const path = require("path");
  * - Async memory export with callback URL
  * - Translation deletion
  * - Translation with TUID and context
+ * - Sharing a memory with the account or a group (add, rename, list, revoke)
  */
 
 async function main() {
@@ -171,6 +172,55 @@ async function main() {
             console.log();
         } catch (error) {
             console.log(`Error deleting translation: ${error.message}\n`);
+        }
+
+        // Example 8: Memory sharing
+        // Sharing requires a multi-user account and the appropriate role (account owner for
+        // account-wide shares, owner/admin for group shares). Each call returns the shared
+        // memory, whose `name` reflects the shared copy's name and `sharedAt` the share time.
+        console.log("=== Memory Sharing ===");
+        try {
+            // Share with the whole account/team (the optional second argument names the shared copy)
+            const teamShare = await lara.memories.addAccountShare(memoryId, "Shared with the team");
+            console.log(`🤝 Shared with the account as: '${teamShare.name}' (shared at ${teamShare.sharedAt})`);
+
+            // Rename the account/team share
+            const renamedTeamShare = await lara.memories.renameAccountShare(memoryId, "Team memory");
+            console.log(`📝 Renamed account share to: '${renamedTeamShare.name}'`);
+
+            // List every share visible to the caller: the account share, group shares and user shares
+            const shares = await lara.memories.getShares(memoryId);
+            if (shares.account) {
+                console.log(`👥 Account share '${shares.account.shareName}' (${shares.account.permissions})`);
+            }
+            for (const group of shares.groups) {
+                console.log(`👥 Group ${group.name}: '${group.shareName}' (${group.permissions})`);
+            }
+            for (const user of shares.users) {
+                console.log(`👤 User ${user.name}: '${user.shareName}' (${user.permissions})`);
+            }
+
+            // Revoke the account/team share
+            await lara.memories.revokeAccountShare(memoryId);
+            console.log("🚫 Revoked the account share");
+
+            // Group shares work the same way, addressed by a group ID (grp_...)
+            const groupId = process.env.LARA_GROUP_ID; // Replace with an actual group ID
+            if (groupId) {
+                const groupShare = await lara.memories.addGroupShare(memoryId, groupId, "Shared with the group");
+                console.log(`🤝 Shared with group ${groupId} as: '${groupShare.name}'`);
+
+                await lara.memories.renameGroupShare(memoryId, groupId, "Marketing group");
+                console.log("📝 Renamed the group share");
+
+                await lara.memories.revokeGroupShare(memoryId, groupId);
+                console.log("🚫 Revoked the group share");
+            } else {
+                console.log("Set LARA_GROUP_ID to try the group sharing methods.");
+            }
+            console.log();
+        } catch (error) {
+            console.log(`Error sharing memory: ${error.message}\n`);
         }
 
     } catch (error) {

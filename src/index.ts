@@ -23,7 +23,10 @@ export {
     Glossaries,
     GlossaryFileFormat,
     GlossaryImport,
-    GlossaryImportCallback
+    GlossaryImportCallback,
+    GlossaryShareEntry,
+    GlossarySharePermission,
+    GlossaryShares
 } from "./glossaries";
 export {
     ImageParagraph,
@@ -36,12 +39,18 @@ export {
     Memories,
     Memory,
     MemoryImport,
-    MemoryImportCallback
+    MemoryImportCallback,
+    MemoryShareEntry,
+    MemorySharePermission,
+    MemoryShares
 } from "./memories";
 export { MultiPartFile } from "./net/lara/client";
 export type { LaraStream } from "./net/s3/laraStream";
 export {
     Styleguide,
+    StyleguideShareEntry,
+    StyleguideSharePermission,
+    StyleguideShares,
     Styleguides
 } from "./styleguides";
 export {

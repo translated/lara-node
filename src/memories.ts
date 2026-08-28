@@ -26,6 +26,23 @@ export interface MemoryImport {
 
 export type MemoryImportCallback = (memoryImport: MemoryImport) => void;
 
+export type MemorySharePermission = "read" | "read_write";
+
+export interface MemoryShareEntry {
+    readonly id: string;
+    readonly name: string;
+    readonly shareName: string;
+    readonly sharedAt: Date;
+    readonly permissions: MemorySharePermission;
+}
+
+export interface MemoryShares {
+    readonly memory: Memory;
+    readonly account: MemoryShareEntry | null;
+    readonly groups: MemoryShareEntry[];
+    readonly users: MemoryShareEntry[];
+}
+
 export class Memories {
     private readonly client: LaraClient;
     private readonly pollingInterval: number;
@@ -72,6 +89,34 @@ export class Memories {
         });
 
         return (Array.isArray(ids) ? memories : memories[0]) as T extends string ? Memory : Memory[];
+    }
+
+    async getShares(id: string): Promise<MemoryShares> {
+        return await this.client.get<MemoryShares>(`/v2/memories/${id}/shares`);
+    }
+
+    async addAccountShare(id: string, name?: string): Promise<Memory> {
+        return await this.client.post<Memory>(`/v2/memories/${id}/shares`, { name });
+    }
+
+    async revokeAccountShare(id: string): Promise<Memory> {
+        return await this.client.delete<Memory>(`/v2/memories/${id}/shares`);
+    }
+
+    async renameAccountShare(id: string, name: string): Promise<Memory> {
+        return await this.client.put<Memory>(`/v2/memories/${id}/shares`, { name });
+    }
+
+    async addGroupShare(id: string, groupId: string, name?: string): Promise<Memory> {
+        return await this.client.post<Memory>(`/v2/memories/${id}/shares/groups/${groupId}`, { name });
+    }
+
+    async revokeGroupShare(id: string, groupId: string): Promise<Memory> {
+        return await this.client.delete<Memory>(`/v2/memories/${id}/shares/groups/${groupId}`);
+    }
+
+    async renameGroupShare(id: string, groupId: string, name: string): Promise<Memory> {
+        return await this.client.put<Memory>(`/v2/memories/${id}/shares/groups/${groupId}`, { name });
     }
 
     async importTmx(id: string, tmx: MultiPartFile): Promise<MemoryImport>;

@@ -8,7 +8,25 @@ export interface Styleguide {
     ownerId: string;
     createdAt: Date;
     updatedAt: Date;
+    sharedAt: Date;
     isPersonal: boolean;
+}
+
+export type StyleguideSharePermission = "read" | "read_write";
+
+export interface StyleguideShareEntry {
+    readonly id: string;
+    readonly name: string;
+    readonly shareName: string;
+    readonly sharedAt: Date;
+    readonly permissions: StyleguideSharePermission;
+}
+
+export interface StyleguideShares {
+    readonly styleguide: Styleguide;
+    readonly account: StyleguideShareEntry | null;
+    readonly groups: StyleguideShareEntry[];
+    readonly users: StyleguideShareEntry[];
 }
 
 export class Styleguides {
@@ -43,5 +61,33 @@ export class Styleguides {
 
     async delete(id: string): Promise<Styleguide> {
         return await this.client.delete<Styleguide>(`/v2/styleguides/${id}`);
+    }
+
+    async getShares(id: string): Promise<StyleguideShares> {
+        return await this.client.get<StyleguideShares>(`/v2/styleguides/${id}/shares`);
+    }
+
+    async addAccountShare(id: string, name?: string): Promise<Styleguide> {
+        return await this.client.post<Styleguide>(`/v2/styleguides/${id}/shares`, { name });
+    }
+
+    async revokeAccountShare(id: string): Promise<Styleguide> {
+        return await this.client.delete<Styleguide>(`/v2/styleguides/${id}/shares`);
+    }
+
+    async renameAccountShare(id: string, name: string): Promise<Styleguide> {
+        return await this.client.put<Styleguide>(`/v2/styleguides/${id}/shares`, { name });
+    }
+
+    async addGroupShare(id: string, groupId: string, name?: string): Promise<Styleguide> {
+        return await this.client.post<Styleguide>(`/v2/styleguides/${id}/shares/groups/${groupId}`, { name });
+    }
+
+    async revokeGroupShare(id: string, groupId: string): Promise<Styleguide> {
+        return await this.client.delete<Styleguide>(`/v2/styleguides/${id}/shares/groups/${groupId}`);
+    }
+
+    async renameGroupShare(id: string, groupId: string, name: string): Promise<Styleguide> {
+        return await this.client.put<Styleguide>(`/v2/styleguides/${id}/shares/groups/${groupId}`, { name });
     }
 }

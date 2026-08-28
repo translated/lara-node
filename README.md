@@ -421,6 +421,30 @@ const deleteJob = await lara.memories.deleteTranslation(
 
 // Wait for import completion
 const completedImport = await lara.memories.waitForImport(memoryImport, undefined, 300000); // 5 minutes
+
+// Share a memory with the whole account/team (optionally naming the shared copy)
+const teamShare = await lara.memories.addAccountShare("mem_1A2b3C4d5E6f7G8h9I0jKl", "Shared with the team");
+
+// Rename the account/team share
+await lara.memories.renameAccountShare("mem_1A2b3C4d5E6f7G8h9I0jKl", "Team memory");
+
+// Revoke the account/team share
+await lara.memories.revokeAccountShare("mem_1A2b3C4d5E6f7G8h9I0jKl");
+
+// Share a memory with a specific group (optionally naming the shared copy)
+const groupShare = await lara.memories.addGroupShare("mem_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl", "Shared with the group");
+
+// Rename the group share
+await lara.memories.renameGroupShare("mem_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl", "Marketing group");
+
+// Revoke the group share
+await lara.memories.revokeGroupShare("mem_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl");
+
+// List the shares available on a memory (account, group and user shares visible to the caller)
+const shares = await lara.memories.getShares("mem_1A2b3C4d5E6f7G8h9I0jKl");
+if (shares.account) console.log(`Account ${shares.account.name}: ${shares.account.permissions}`);
+for (const group of shares.groups) console.log(`Group ${group.name}: ${group.permissions}`);
+for (const user of shares.users) console.log(`User ${user.name}: ${user.permissions}`);
 ```
 
 ### 📚 Glossary Management
@@ -452,6 +476,19 @@ const { jobId } = await lara.glossaries.exportAsync(
 
 // Get glossary terms count
 const counts = await lara.glossaries.counts("gls_1A2b3C4d5E6f7G8h9I0jKl");
+
+// Share with the whole account, rename the share, then list visible shares
+await lara.glossaries.addAccountShare("gls_1A2b3C4d5E6f7G8h9I0jKl", "Team glossary");
+await lara.glossaries.renameAccountShare("gls_1A2b3C4d5E6f7G8h9I0jKl", "Company terminology");
+const glossaryShares = await lara.glossaries.getShares("gls_1A2b3C4d5E6f7G8h9I0jKl");
+
+// Share with a group, rename the share, and revoke it
+await lara.glossaries.addGroupShare("gls_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl", "Marketing glossary");
+await lara.glossaries.renameGroupShare("gls_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl", "Marketing terminology");
+await lara.glossaries.revokeGroupShare("gls_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl");
+
+// Revoke the account share
+await lara.glossaries.revokeAccountShare("gls_1A2b3C4d5E6f7G8h9I0jKl");
 ```
 
 ### 📘 Styleguide Management
@@ -486,6 +523,19 @@ const updated = await lara.styleguides.update(
     "FinalName",
     "Use clear and concise language. Avoid jargon."
 );
+
+// Share with the whole account, rename the share, then list visible shares
+await lara.styleguides.addAccountShare("stg_1A2b3C4d5E6f7G8h9I0jKl", "Team styleguide");
+await lara.styleguides.renameAccountShare("stg_1A2b3C4d5E6f7G8h9I0jKl", "Company styleguide");
+const styleguideShares = await lara.styleguides.getShares("stg_1A2b3C4d5E6f7G8h9I0jKl");
+
+// Share with a group, rename the share, and revoke it
+await lara.styleguides.addGroupShare("stg_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl", "Marketing styleguide");
+await lara.styleguides.renameGroupShare("stg_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl", "Marketing guidelines");
+await lara.styleguides.revokeGroupShare("stg_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d5E6f7G8h9I0jKl");
+
+// Revoke the account share
+await lara.styleguides.revokeAccountShare("stg_1A2b3C4d5E6f7G8h9I0jKl");
 
 // Delete a styleguide
 await lara.styleguides.delete("stg_1A2b3C4d5E6f7G8h9I0jKl");
