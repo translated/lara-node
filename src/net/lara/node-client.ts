@@ -85,8 +85,10 @@ export class NodeLaraClient extends LaraClient {
                     });
                 }
 
-                // biome-ignore lint/suspicious/noAssignInExpressions: store response data
-                res.on("data", (chunk) => (data += chunk));
+                res.setEncoding("utf8");
+                res.on("data", (chunk: string) => {
+                    data += chunk;
+                });
 
                 res.on("end", () => {
                     hardTimeout && clearTimeout(hardTimeout);
@@ -199,8 +201,9 @@ export class NodeLaraClient extends LaraClient {
         const req = (this.baseUrl.secure ? https : http).request(options, (res) => {
             let buffer = "";
 
-            res.on("data", (chunk: Buffer) => {
-                buffer += chunk.toString();
+            res.setEncoding("utf8");
+            res.on("data", (chunk: string) => {
+                buffer += chunk;
                 const lines = buffer.split("\n");
                 buffer = lines.pop() || ""; // Keep incomplete line in buffer
 
@@ -382,8 +385,10 @@ export class NodeClient {
             const req = (parsedURL.secure ? https : http).request(options, (res) => {
                 let data = "";
 
-                // biome-ignore lint/suspicious/noAssignInExpressions: store response data
-                res.on("data", (chunk) => (data += chunk));
+                res.setEncoding("utf8");
+                res.on("data", (chunk: string) => {
+                    data += chunk;
+                });
 
                 res.on("end", () => {
                     let json: any;
