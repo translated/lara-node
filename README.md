@@ -388,21 +388,10 @@ const memoryImport = await lara.memories.addTranslation(
 const tmxFileStream = fs.createReadStream("/path/to/your/memory.tmx");  // Replace with actual TMX file path
 const memoryImport = await lara.memories.importTmx("mem_1A2b3C4d5E6f7G8h9I0jKl", tmxFileStream);
 
-// TMX import with gzip compression
-const memoryImport = await lara.memories.importTmx("mem_1A2b3C4d5E6f7G8h9I0jKl", tmxFileStream, true);
-
 // TMX import with a callback URL (notified when the import completes)
 const memoryImport = await lara.memories.importTmx(
     "mem_1A2b3C4d5E6f7G8h9I0jKl",
     tmxFileStream,
-    "https://your-server.example.com/lara/import-callback"
-);
-
-// TMX import with both gzip compression and a callback URL
-const memoryImport = await lara.memories.importTmx(
-    "mem_1A2b3C4d5E6f7G8h9I0jKl",
-    tmxFileStream,
-    true,
     "https://your-server.example.com/lara/import-callback"
 );
 
@@ -461,8 +450,7 @@ const glossaryImport = await lara.glossaries.importFile(
     { contentType: "csv/table-uni" }
 );
 
-// Options are independent; omitted contentType and gzip default to "csv/table-uni" and false.
-// gzip describes an already compressed file; it does not compress the input.
+// Options are independent; contentType defaults to "csv/table-uni".
 // await lara.glossaries.importFile(glossary.id, glossaryFileStream, { callbackUrl });
 
 // Check import status

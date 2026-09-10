@@ -132,8 +132,6 @@ async function main() {
                 const tmxImportWithCallback = await lara.memories.importTmx(memoryId, tmxFilePath, callbackUrl);
                 console.log(`Import started with ID: ${tmxImportWithCallback.id} (callback: ${callbackUrl})`);
 
-                // You can also combine gzip + callbackUrl:
-                // await lara.memories.importTmx(memoryId, tmxFilePath, true, callbackUrl);
                 console.log();
             } catch (error) {
                 console.log(`Error starting TMX import with callback: ${error.message}\n`);

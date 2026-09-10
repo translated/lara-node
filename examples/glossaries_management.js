@@ -104,10 +104,6 @@ async function main() {
                 const importWithCallback = await lara.glossaries.importFile(glossaryId, csvFilePath, { callbackUrl });
                 console.log(`Import started with ID: ${importWithCallback.id} (callback: ${callbackUrl})`);
 
-                // You can also combine a content type + gzip + callbackUrl:
-                // await lara.glossaries.importFile(glossaryId, `${csvFilePath}.gz`, {
-                //     contentType: "csv/table-uni", gzip: true, callbackUrl
-                // });
                 console.log();
             } catch (error) {
                 console.log(`Error starting CSV import with callback: ${error.message}\n`);
