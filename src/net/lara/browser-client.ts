@@ -75,12 +75,11 @@ export class BrowserLaraClient extends LaraClient {
                 };
             }
 
-            if (response.headers.get("Content-Type")?.includes("text/csv")) {
+            const contentType = response.headers.get("Content-Type") ?? "";
+            if (contentType.includes("text/csv") || contentType.includes("application/xml")) {
                 return {
                     statusCode: response.status,
-                    body: {
-                        content: await response.text()
-                    },
+                    body: await response.text(),
                     headers: Object.fromEntries(response.headers)
                 };
             }

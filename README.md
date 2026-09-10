@@ -453,12 +453,20 @@ for (const user of shares.users) console.log(`User ${user.name}: ${user.permissi
 // Create glossary
 const glossary = await lara.glossaries.create("MyGlossary");
 
-// Import CSV from file
-const csvFileStream = fs.createReadStream("/path/to/your/glossary.csv");  // Replace with actual CSV file path
-const glossaryImport = await lara.glossaries.importCsv("gls_1A2b3C4d5E6f7G8h9I0jKl", csvFileStream);
+// Import a glossary file (use "tbx" for TBX files)
+const glossaryFileStream = fs.createReadStream("/path/to/your/glossary.csv");
+const glossaryImport = await lara.glossaries.importFile(
+    "gls_1A2b3C4d5E6f7G8h9I0jKl",
+    glossaryFileStream,
+    { contentType: "csv/table-uni" }
+);
+
+// Options are independent; omitted contentType and gzip default to "csv/table-uni" and false.
+// gzip describes an already compressed file; it does not compress the input.
+// await lara.glossaries.importFile(glossary.id, glossaryFileStream, { callbackUrl });
 
 // Check import status
-const importStatus = await lara.glossaries.getImportStatus("gls_1A2b3C4d5E6f7G8h9I0jKl");
+const importStatus = await lara.glossaries.getImportStatus(glossaryImport.id);
 
 // Wait for import completion
 const completedImport = await lara.glossaries.waitForImport(glossaryImport, undefined, 300000); // 5 minutes

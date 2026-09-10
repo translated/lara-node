@@ -24,6 +24,7 @@ export {
     GlossaryFileFormat,
     GlossaryImport,
     GlossaryImportCallback,
+    GlossaryImportOptions,
     GlossaryShareEntry,
     GlossarySharePermission,
     GlossaryShares

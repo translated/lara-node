@@ -26,7 +26,14 @@ export interface GlossaryCounts {
     multidirectional?: number;
 }
 
-export type GlossaryFileFormat = "csv/table-uni" | "csv/table-multi";
+export type GlossaryFileFormat = "csv/table-uni" | "csv/table-multi" | "tbx";
+
+export interface GlossaryImportOptions {
+    contentType?: GlossaryFileFormat;
+    /** Whether the supplied file is already gzip-compressed. */
+    gzip?: boolean;
+    callbackUrl?: string;
+}
 
 export type GlossaryImportCallback = (glossaryImport: GlossaryImport) => void;
 
@@ -111,11 +118,29 @@ export class Glossaries {
         return await this.client.put<Glossary>(`/v2/glossaries/${id}/shares/groups/${groupId}`, { name });
     }
 
+    async importFile(id: string, file: MultiPartFile, options: GlossaryImportOptions = {}): Promise<GlossaryImport> {
+        const { contentType = "csv/table-uni", gzip = false, callbackUrl } = options;
+
+        return await this.client.post<GlossaryImport>(
+            `/v2/glossaries/${id}/import`,
+            {
+                compression: gzip ? "gzip" : undefined,
+                content_type: contentType,
+                callback_url: callbackUrl
+            },
+            {
+                csv: file
+            }
+        );
+    }
+
+    /** @deprecated Use `importFile` instead. */
     async importCsv(id: string, csv: MultiPartFile, gzip?: boolean, callbackUrl?: string): Promise<GlossaryImport>;
+    /** @deprecated Use `importFile` instead. */
     async importCsv(
         id: string,
         csv: MultiPartFile,
-        contentType: GlossaryFileFormat,
+        contentType: Exclude<GlossaryFileFormat, "tbx">,
         gzip?: boolean,
         callbackUrl?: string
     ): Promise<GlossaryImport>;
@@ -126,33 +151,20 @@ export class Glossaries {
         maybeGzipOrCallbackUrl?: boolean | string,
         maybeCallbackUrl?: string
     ): Promise<GlossaryImport> {
-        // Default values when no content type or gzip flag is provided
-        let gzip: boolean = false;
-        let contentType: GlossaryFileFormat = "csv/table-uni";
-        let callbackUrl: string | undefined;
-
-        if (typeof gzipOrContentType === "boolean") {
-            // First overload: (id, csv, gzip, callbackUrl)
-            gzip = gzipOrContentType;
-            callbackUrl = typeof maybeGzipOrCallbackUrl === "string" ? maybeGzipOrCallbackUrl : undefined;
-        } else if (typeof gzipOrContentType === "string") {
-            // Second overload: (id, csv, contentType, gzip, callbackUrl)
-            contentType = gzipOrContentType;
-            gzip = typeof maybeGzipOrCallbackUrl === "boolean" ? maybeGzipOrCallbackUrl : false;
-            callbackUrl = maybeCallbackUrl;
+        if (typeof gzipOrContentType === "string") {
+            if (gzipOrContentType !== "csv/table-uni" && gzipOrContentType !== "csv/table-multi") {
+                throw new TypeError("importCsv only supports CSV formats; use importFile for TBX files.");
+            }
+            const gzip = typeof maybeGzipOrCallbackUrl === "boolean" ? maybeGzipOrCallbackUrl : undefined;
+            return await this.importFile(id, csv, {
+                contentType: gzipOrContentType,
+                gzip,
+                callbackUrl: maybeCallbackUrl
+            });
         }
 
-        return await this.client.post<GlossaryImport>(
-            `/v2/glossaries/${id}/import`,
-            {
-                compression: gzip ? "gzip" : undefined,
-                content_type: contentType,
-                callback_url: callbackUrl
-            },
-            {
-                csv
-            }
-        );
+        const callbackUrl = typeof maybeGzipOrCallbackUrl === "string" ? maybeGzipOrCallbackUrl : undefined;
+        return await this.importFile(id, csv, { gzip: gzipOrContentType, callbackUrl });
     }
 
     async getImportStatus(id: string): Promise<GlossaryImport> {

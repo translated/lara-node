@@ -73,7 +73,7 @@ async function main() {
         
         if (fs.existsSync(csvFilePath)) {
             console.log(`Importing CSV file: ${path.basename(csvFilePath)}`);
-            const csvImport = await lara.glossaries.importCsv(glossaryId, csvFilePath);
+            const csvImport = await lara.glossaries.importFile(glossaryId, csvFilePath);
             console.log(`Import started with ID: ${csvImport.id}`);
             console.log(`Initial progress: ${Math.round(csvImport.progress * 100)}%`);
             
@@ -100,13 +100,14 @@ async function main() {
         if (fs.existsSync(csvFilePath)) {
             try {
                 const callbackUrl = "https://your-server.example.com/lara/import-callback"; // Replace with your endpoint
-                // Note: the callback URL must follow the gzip flag (importCsv has no callback-only overload),
-                // so pass gzip explicitly even when you don't need compression.
-                const importWithCallback = await lara.glossaries.importCsv(glossaryId, csvFilePath, false, callbackUrl);
+                // Supply just the options you need.
+                const importWithCallback = await lara.glossaries.importFile(glossaryId, csvFilePath, { callbackUrl });
                 console.log(`Import started with ID: ${importWithCallback.id} (callback: ${callbackUrl})`);
 
                 // You can also combine a content type + gzip + callbackUrl:
-                // await lara.glossaries.importCsv(glossaryId, csvFilePath, "csv/table-uni", true, callbackUrl);
+                // await lara.glossaries.importFile(glossaryId, `${csvFilePath}.gz`, {
+                //     contentType: "csv/table-uni", gzip: true, callbackUrl
+                // });
                 console.log();
             } catch (error) {
                 console.log(`Error starting CSV import with callback: ${error.message}\n`);
@@ -299,4 +300,4 @@ async function main() {
     console.log("\n🎉 Glossary management examples completed!");
 }
 
-main().catch(console.error); 
+main().catch(console.error);
