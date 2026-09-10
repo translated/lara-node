@@ -27,6 +27,8 @@ export type MultiPartFile = BrowserMultiPartFile | NodeMultiPartFile;
 
 /** @internal */
 export abstract class LaraClient {
+    protected readonly sdkName: string = "lara-node";
+
     private readonly crypto: PortableCrypto = cryptoInstance();
     private readonly extraHeaders: Record<string, string> = {};
 
@@ -337,7 +339,7 @@ export abstract class LaraClient {
     ): Promise<Record<string, string>> {
         const headers: Record<string, string> = {
             "X-Lara-Date": new Date().toUTCString(),
-            "X-Lara-SDK-Name": "lara-node",
+            "X-Lara-SDK-Name": this.sdkName,
             "X-Lara-SDK-Version": SdkVersion,
             ...this.filterNullish(this.extraHeaders),
             ...this.filterNullish(customHeaders)

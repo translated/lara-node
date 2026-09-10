@@ -8,6 +8,8 @@ function hasDefaultPort(port: number, secure: boolean): boolean {
 
 /** @internal */
 export class BrowserLaraClient extends LaraClient {
+    protected override readonly sdkName: string = "lara-browser";
+
     private readonly baseUrl: string;
     private readonly timeout: number | undefined;
 
