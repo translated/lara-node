@@ -99,6 +99,7 @@ node document_translation.js
     - Basic image translation
     - Advanced options with memories and glossaries
     - Extract and translate text from an image
+    - Edit translations and render them with layout or text-only paragraphs
 
 ```bash
 cd examples
@@ -307,23 +308,88 @@ const translatedContent = await lara.documents.download(document.id);
 
 ### 🖼️ Image Translation
 
-```javascript
+```typescript
 const fs = require("fs");
+const { pipeline } = require("stream");
+const { promisify } = require("util");
 
-const imageStream = fs.createReadStream("/path/to/your/image.png"); // Replace with actual file path
+const saveImage = promisify(pipeline);
+const imagePath = "/path/to/your/image.png"; // Replace with actual file path
 
 // Translate image and receive a translated image stream
-const translatedImageStream = await lara.images.translate(imageStream, "en", "fr", {
-    model: "inpainting",
+const translatedImageStream = await lara.images.translate(fs.createReadStream(imagePath), "en", "fr", {
+    model: "generative_fast",
     style: "faithful"
 });
+await saveImage(translatedImageStream, fs.createWriteStream("translated.png"));
 
-// Extract and translate text blocks from an image
-const textBlocks = await lara.images.translateText(imageStream, "en", "fr", {
-    adaptTo: ["mem_1A2b3C4d5E6f7G8h9I0jKl"],
-    glossaries: ["gls_1A2b3C4d5E6f7G8h9I0jKl"],
+// Request layout metadata. Open a fresh stream for every request.
+const textBlocks = await lara.images.translateText(fs.createReadStream(imagePath), "en", "fr", {
+    includeLayout: true
 });
+
+// Replace the first translation while preserving its geometry and text styling.
+const editedParagraphs = textBlocks.paragraphs.map((paragraph, index) =>
+    index === 0 ? { ...paragraph, translation: "Bonjour le monde !" } : paragraph
+);
+const renderedImage = await lara.images.renderTranslated(
+    fs.createReadStream(imagePath),
+    textBlocks.sourceLanguage,
+    "fr",
+    editedParagraphs,
+    "overlay"
+);
+await saveImage(renderedImage, fs.createWriteStream("edited-overlay.png"));
+
+// Generative models can render text-only paragraphs. Omit model for generative_fast.
+const textOnlyParagraphs = editedParagraphs.map(({ text, translation }) => ({ text, translation }));
+const generativeImage = await lara.images.renderTranslated(
+    fs.createReadStream(imagePath),
+    null,
+    "fr",
+    textOnlyParagraphs
+);
+await saveImage(generativeImage, fs.createWriteStream("edited-generative.png"));
 ```
+
+`renderTranslated(file, source, target, paragraphs, model?, noTrace?)` renders supplied translations without translating them again.
+Pass `null` for `source` to omit the source language. The supported models are `overlay`, `inpainting`, `generative`,
+and `generative_fast`; omitting `model` uses the API default, `generative_fast`. Set `noTrace` to `true` to disable
+request tracing.
+
+The classic models (`overlay` and `inpainting`) require every paragraph to include `text`, `translation`, and all layout
+fields: `bbox`, `linesBboxes`, `textInfo`, and `alignment`. Both generative models accept text-only or complete layout
+paragraphs. Partial layout is invalid; validation errors are reported through the usual `LaraApiError` handling.
+
+The TypeScript overloads enforce the model's input requirements:
+
+| Model | Paragraph argument |
+| --- | --- |
+| `overlay`, `inpainting` | `(ImageParagraphContent & ImageParagraphLayout)[]` |
+| `generative`, `generative_fast`, or omitted | `ImageParagraphContent[]` (complete layout paragraphs also accepted) |
+| A variable that could select either model family | `(ImageParagraphContent & ImageParagraphLayout)[]`; narrow the model to a generative value to use text only |
+
+TypeScript exports include `ImageTranslationModel`, `ImageParagraphContent`, `ImageLayoutParagraph`,
+and the shared `ImageParagraphLayout`, `ImageBBox`, and `ImageTextInfo` types. Bounding boxes contain `topLeft`,
+`topRight`, `bottomRight`, and `bottomLeft` coordinate pairs (`[number, number]`). Text info contains `direction`
+(`ltr`, `rtl`, or `ttb`), `textColor`, and `backgroundColor`; alignment is `left`, `center`, or `right`.
+`translateText` infers the paragraph type in `ImageTextResult<Paragraph>` from `includeLayout`:
+
+| Options | Paragraph fields |
+| --- | --- |
+| `includeLayout` omitted or `false` | `ImageParagraph` |
+| `includeLayout: true` | `ImageLayoutParagraph`: complete layout metadata is included |
+
+`includeLayout: true` guarantees that `bbox`, `linesBboxes`, `textInfo`, and `alignment` are present on every
+paragraph, so the result can be passed directly to a classic rendering model.
+
+`ImageParagraphContent` contains `text` and `translation`. `ImageParagraph` extends it with the optional fields
+`adaptedToMatches?: NGMemoryMatch[]` and `glossariesMatches?: NGGlossaryMatch[]`. `verbose: true` requests match
+details from the API, but does not change the return type: match fields remain optional with or without layout.
+Plain `ImageTextResult` defaults to `ImageParagraph` entries.
+An `includeLayout` boolean whose value is only known at runtime produces a union of the two paragraph shapes.
+Keep all available layout metadata when editing translations for classic rendering. The SDK converts these camelCase
+properties to the API's snake_case JSON fields.
 
 ### 🔊 Audio Translation
 #### Simple audio translation

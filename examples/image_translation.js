@@ -1,6 +1,10 @@
-const { Credentials, Translator } = require("lara-sdk");
+const { Credentials, Translator } = require("@translated/lara");
 const fs = require("fs");
 const path = require("path");
+const { pipeline } = require("stream");
+const { promisify } = require("util");
+
+const saveImage = promisify(pipeline);
 
 /**
  * Complete image translation examples for the Lara Node.js SDK
@@ -9,6 +13,7 @@ const path = require("path");
  * - Basic image translation
  * - Advanced options with memories and glossaries
  * - Extracting and translating text from an image
+ * - Editing translations and rendering with classic and generative models
  */
 
 async function main() {
@@ -41,7 +46,7 @@ async function main() {
   try {
     const fileStream = fs.createReadStream(sampleFilePath);
     const translatedStream = await lara.images.translate(fileStream, sourceLang, targetLang, {
-      model: "overlay"
+      model: "generative_fast"
     });
 
     const outputPath = path.join(__dirname, "sample_image_translated.png");
@@ -89,27 +94,62 @@ async function main() {
   }
   console.log();
 
-  // Example 3: Extract and translate text from an image
-  console.log("=== Extract and Translate Text ===");
+  // Example 3: Extract text with layout, edit a translation, and render it
+  console.log("=== Extract, Edit, and Render Translations ===");
   try {
-    const fileStream3 = fs.createReadStream(sampleFilePath);
-    const results = await lara.images.translateText(fileStream3, sourceLang, targetLang, {
-      adaptTo: ["mem_1A2b3C4d5E6f7G8h9I0jKl"],
-      glossaries: ["gls_1A2b3C4d5E6f7G8h9I0jKl"],
-      style: "faithful"
+    const results = await lara.images.translateText(fs.createReadStream(sampleFilePath), sourceLang, targetLang, {
+      style: "faithful",
+      includeLayout: true
     });
 
     console.log("✅ Extract and translate completed");
     console.log(`Found ${results.paragraphs.length} text blocks`);
 
-    
     results.paragraphs.forEach((result, index) => {
       console.log(`\nText Block ${index + 1}:`);
       console.log(`Original: ${result.text}`);
       console.log(`Translated: ${result.translation}`);
     });
+
+    if (results.paragraphs.length === 0) {
+      console.log("No text found to render.");
+      return;
+    }
+
+    // Replace with your desired translation, keeping all layout metadata.
+    const editedParagraphs = results.paragraphs.map((paragraph, index) =>
+      index === 0 ? { ...paragraph, translation: "Hallo Welt!" } : paragraph
+    );
+
+    // Classic models (overlay and inpainting) require bbox, linesBboxes, textInfo,
+    // and alignment on every paragraph. includeLayout guarantees these fields.
+    // Open a fresh input stream for each request because streams are consumed.
+    const classicImage = await lara.images.renderTranslated(
+      fs.createReadStream(sampleFilePath),
+      results.sourceLanguage,
+      targetLang,
+      editedParagraphs,
+      "overlay"
+    );
+    const classicOutputPath = path.join(__dirname, "edited_image_overlay.png");
+    await saveImage(classicImage, fs.createWriteStream(classicOutputPath));
+    console.log(`Edited image saved to: ${path.basename(classicOutputPath)}`);
+
+    // Example 4: Generative rendering accepts text-only paragraphs.
+    // Omit model to use the API default generative_fast, or pass "generative"
+    // or "generative_fast" explicitly. Pass null to omit the source language.
+    const textOnlyParagraphs = editedParagraphs.map(({ text, translation }) => ({ text, translation }));
+    const generativeImage = await lara.images.renderTranslated(
+      fs.createReadStream(sampleFilePath),
+      null,
+      targetLang,
+      textOnlyParagraphs
+    );
+    const generativeOutputPath = path.join(__dirname, "edited_image_generative.png");
+    await saveImage(generativeImage, fs.createWriteStream(generativeOutputPath));
+    console.log(`Generative image saved to: ${path.basename(generativeOutputPath)}`);
   } catch (error) {
-    console.log(`Error extracting and translating text: ${error.message}`);
+    console.log(`Error extracting, editing, or rendering translations: ${error.message}`);
   }
 }
 

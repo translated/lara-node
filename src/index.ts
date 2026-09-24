@@ -30,9 +30,15 @@ export {
     GlossaryShares
 } from "./glossaries";
 export {
+    ImageBBox,
+    ImageLayoutParagraph,
     ImageParagraph,
+    ImageParagraphContent,
+    ImageParagraphLayout,
+    ImageTextInfo,
     ImageTextResult,
     ImageTextTranslationOptions,
+    ImageTranslationModel,
     ImageTranslationOptions,
     ImageTranslator
 } from "./imageTranslator";
