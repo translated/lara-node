@@ -497,9 +497,9 @@ await lara.memories.revokeGroupShare("mem_1A2b3C4d5E6f7G8h9I0jKl", "grp_1A2b3C4d
 
 // List the shares available on a memory (account, group and user shares visible to the caller)
 const shares = await lara.memories.getShares("mem_1A2b3C4d5E6f7G8h9I0jKl");
-if (shares.account) console.log(`Account ${shares.account.name}: ${shares.account.permissions}`);
-for (const group of shares.groups) console.log(`Group ${group.name}: ${group.permissions}`);
-for (const user of shares.users) console.log(`User ${user.name}: ${user.permissions}`);
+if (shares.account) console.log(`Account ${shares.account.name}: ${shares.account.permissionMask}`);
+for (const group of shares.groups) console.log(`Group ${group.name}: ${group.permissionMask}`);
+for (const user of shares.users) console.log(`User ${user.name}: ${user.permissionMask}`);
 ```
 
 ### 📚 Glossary Management

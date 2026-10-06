@@ -1,6 +1,7 @@
 import { LaraApiError, TimeoutError } from "./errors";
 import type { LaraClient } from "./net/lara";
 import type { MultiPartFile } from "./net/lara/client";
+import type { PermissionMask } from "./permissions";
 
 export interface Memory {
     readonly id: string;
@@ -13,6 +14,11 @@ export interface Memory {
     readonly ownerId: string;
     readonly collaboratorsCount: number;
     readonly isPersonal: boolean;
+    /**
+     * Effective combined mask in GET list and detail responses; the selected share's stored mask
+     * on the resource embedded in GET /shares responses. Omitted from non-GET responses.
+     */
+    readonly permissionMask?: PermissionMask;
 }
 
 export interface MemoryImport {
@@ -26,14 +32,13 @@ export interface MemoryImport {
 
 export type MemoryImportCallback = (memoryImport: MemoryImport) => void;
 
-export type MemorySharePermission = "read" | "read_write";
-
 export interface MemoryShareEntry {
     readonly id: string;
     readonly name: string;
     readonly shareName: string;
     readonly sharedAt: Date;
-    readonly permissions: MemorySharePermission;
+    /** The permissions stored on this share. */
+    readonly permissionMask: PermissionMask;
 }
 
 export interface MemoryShares {

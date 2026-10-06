@@ -1,6 +1,7 @@
 import { LaraApiError, TimeoutError } from "./errors";
 import type { LaraClient } from "./net/lara";
 import type { MultiPartFile } from "./net/lara/client";
+import type { PermissionMask } from "./permissions";
 
 export interface Glossary {
     readonly id: string;
@@ -10,6 +11,11 @@ export interface Glossary {
     readonly updatedAt: Date;
     readonly sharedAt: Date;
     readonly isPersonal: boolean;
+    /**
+     * Effective combined mask in GET list and detail responses; the selected share's stored mask
+     * on the resource embedded in GET /shares responses. Omitted from non-GET responses.
+     */
+    readonly permissionMask?: PermissionMask;
 }
 
 export interface GlossaryImport {
@@ -37,14 +43,13 @@ export interface GlossaryImportOptions {
 
 export type GlossaryImportCallback = (glossaryImport: GlossaryImport) => void;
 
-export type GlossarySharePermission = "read" | "read_write";
-
 export interface GlossaryShareEntry {
     readonly id: string;
     readonly name: string;
     readonly shareName: string;
     readonly sharedAt: Date;
-    readonly permissions: GlossarySharePermission;
+    /** The permissions stored on this share. */
+    readonly permissionMask: PermissionMask;
 }
 
 export interface GlossaryShares {

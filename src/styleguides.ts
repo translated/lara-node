@@ -1,5 +1,6 @@
 import { LaraApiError } from "./errors";
 import type { LaraClient } from "./net/lara";
+import type { PermissionMask } from "./permissions";
 
 export interface Styleguide {
     id: string;
@@ -10,16 +11,20 @@ export interface Styleguide {
     updatedAt: Date;
     sharedAt: Date;
     isPersonal: boolean;
+    /**
+     * Effective combined mask in GET list and detail responses; the selected share's stored mask
+     * on the resource embedded in GET /shares responses. Omitted from non-GET responses.
+     */
+    permissionMask?: PermissionMask;
 }
-
-export type StyleguideSharePermission = "read" | "read_write";
 
 export interface StyleguideShareEntry {
     readonly id: string;
     readonly name: string;
     readonly shareName: string;
     readonly sharedAt: Date;
-    readonly permissions: StyleguideSharePermission;
+    /** The permissions stored on this share. */
+    readonly permissionMask: PermissionMask;
 }
 
 export interface StyleguideShares {

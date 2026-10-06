@@ -189,13 +189,13 @@ async function main() {
             // List every share visible to the caller: the account share, group shares and user shares
             const shares = await lara.memories.getShares(memoryId);
             if (shares.account) {
-                console.log(`👥 Account share '${shares.account.shareName}' (${shares.account.permissions})`);
+                console.log(`👥 Account share '${shares.account.shareName}' (${shares.account.permissionMask})`);
             }
             for (const group of shares.groups) {
-                console.log(`👥 Group ${group.name}: '${group.shareName}' (${group.permissions})`);
+                console.log(`👥 Group ${group.name}: '${group.shareName}' (${group.permissionMask})`);
             }
             for (const user of shares.users) {
-                console.log(`👤 User ${user.name}: '${user.shareName}' (${user.permissions})`);
+                console.log(`👤 User ${user.name}: '${user.shareName}' (${user.permissionMask})`);
             }
 
             // Revoke the account/team share

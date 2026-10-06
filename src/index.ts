@@ -21,12 +21,12 @@ export {
 export { LaraApiError, LaraError, TimeoutError } from "./errors";
 export {
     Glossaries,
+    Glossary,
     GlossaryFileFormat,
     GlossaryImport,
     GlossaryImportCallback,
     GlossaryImportOptions,
     GlossaryShareEntry,
-    GlossarySharePermission,
     GlossaryShares
 } from "./glossaries";
 export {
@@ -48,15 +48,14 @@ export {
     MemoryImport,
     MemoryImportCallback,
     MemoryShareEntry,
-    MemorySharePermission,
     MemoryShares
 } from "./memories";
 export { MultiPartFile } from "./net/lara/client";
 export type { LaraStream } from "./net/s3/laraStream";
+export type { PermissionMask } from "./permissions";
 export {
     Styleguide,
     StyleguideShareEntry,
-    StyleguideSharePermission,
     StyleguideShares,
     Styleguides
 } from "./styleguides";
