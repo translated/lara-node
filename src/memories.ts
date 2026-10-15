@@ -13,7 +13,6 @@ export interface Memory {
     readonly secret?: string;
     readonly ownerId: string;
     readonly collaboratorsCount: number;
-    readonly isPersonal: boolean;
     /**
      * Effective combined mask in GET list and detail responses; the selected share's stored mask
      * on the resource embedded in GET /shares responses. Omitted from non-GET responses.

@@ -10,7 +10,6 @@ export interface Glossary {
     readonly createdAt: Date;
     readonly updatedAt: Date;
     readonly sharedAt: Date;
-    readonly isPersonal: boolean;
     /**
      * Effective combined mask in GET list and detail responses; the selected share's stored mask
      * on the resource embedded in GET /shares responses. Omitted from non-GET responses.

@@ -44,7 +44,6 @@ async function main() {
         const retrievedStyleguide = await lara.styleguides.get(styleguideId);
         if (retrievedStyleguide) {
             console.log(`📖 Styleguide: ${retrievedStyleguide.name} (Owner: ${retrievedStyleguide.ownerId})`);
-            console.log(`   Personal: ${retrievedStyleguide.isPersonal}`);
             console.log(`   Created at: ${retrievedStyleguide.createdAt}`);
             if (retrievedStyleguide.content) {
                 console.log(`   Content preview: ${retrievedStyleguide.content.substring(0, 80)}...`);
