@@ -251,9 +251,9 @@ export class NodeLaraClient extends LaraClient {
 
             res.on("error", (err) => {
                 hardTimeout && clearTimeout(hardTimeout);
-                if (err instanceof TimeoutError) throw err;
+                // Preserve the original error if destroying the request also aborts the response.
+                streamError ??= err;
                 req.destroy();
-                streamError = err;
 
                 if (resolveChunk) {
                     resolveChunk();
@@ -264,8 +264,7 @@ export class NodeLaraClient extends LaraClient {
 
         req.on("error", (err) => {
             hardTimeout && clearTimeout(hardTimeout);
-            if (err instanceof TimeoutError) throw err;
-            streamError = err;
+            streamError ??= err;
 
             if (resolveChunk) {
                 resolveChunk();
