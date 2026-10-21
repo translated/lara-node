@@ -61,11 +61,16 @@ export {
 } from "./styleguides";
 export {
     DetectResult,
+    ImageContext,
+    IntelligenceFailure,
     NGGlossaryMatch,
     NGMemoryMatch,
     ProfanitiesResult,
     ProfanityDetectResult,
     QualityEstimationResult,
+    ReasoningFeedback,
+    ReasoningWarning,
+    ReferenceRetrievalFailure,
     StyleguideChange,
     StyleguideResults,
     TextBlock,

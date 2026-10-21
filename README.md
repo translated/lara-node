@@ -218,6 +218,46 @@ const options = {
 const result = await lara.translate("Hello", "en-US", "fr-FR", options);
 ```
 
+#### Text Translation with Image Context
+
+Pass `imageContext` to use an image as visual context for translating text. Enable
+`reasoning` with `true`:
+
+```javascript
+const result = await lara.translate("Open", "en-US", "it-IT", {
+    reasoning: true,
+    imageContext: { url: "https://example.com/storefront.png" }
+});
+console.log(result.translation);
+
+// The server reports recovery without images under warnings.reasoning.
+for (const warning of result.warnings?.reasoning?.warnings ?? []) {
+    console.warn(warning.code, warning.message);
+}
+```
+
+You can also supply a single-element array or an inline image. For example, in Node.js:
+
+```javascript
+const fs = require("fs");
+const result = await lara.translate("Open", "en-US", "it-IT", {
+    reasoning: true,
+    imageContext: [{ url: `data:image/png;base64,${fs.readFileSync("storefront.png").toString("base64")}` }]
+});
+```
+
+The API accepts at most one image: an HTTPS URL or a base64 PNG, JPEG or WebP data
+URL. Inline images must match their declared MIME type and contain at most 5 MiB
+of decoded data; the serialized request body is limited to 16 MiB. Omitting
+`imageContext` or passing `[]` preserves text-only behavior. Validation is performed
+by the API, which returns 400 for invalid input and 413 for size violations.
+
+If the image cannot be used, the server may retry the entire request with reasoning
+without images. The result then includes an `image_context_unavailable` warning
+under `warnings.reasoning.warnings`. `warnings.reasoning.applied` is `true` when
+reasoning succeeds without images, or `false` (with an `error`) when the server
+falls back to standard translation.
+
 #### Language Detection
 
 Use detect() to automatically identify the language of one or multiple texts.

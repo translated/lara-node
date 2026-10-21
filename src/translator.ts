@@ -65,6 +65,30 @@ export type StyleguideResults<T extends string | string[] | TextBlock[]> = {
     changes: StyleguideChange[];
 };
 
+export type ImageContext = {
+    /** HTTPS URL or base64 data URL containing a PNG, JPEG or WebP image. */
+    url: string;
+};
+
+export type IntelligenceFailure = {
+    applied: false;
+    error: { statusCode: number; message: string };
+};
+
+export type ReferenceRetrievalFailure = {
+    applied: false | "partial";
+    error: IntelligenceFailure["error"];
+};
+
+export type ReasoningWarning = {
+    code: "image_context_unavailable";
+    message: string;
+};
+
+export type ReasoningFeedback = (IntelligenceFailure | { applied: true }) & {
+    warnings?: ReasoningWarning[];
+};
+
 export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly contentType: string;
     readonly sourceLanguage: string;
@@ -75,6 +99,12 @@ export interface TextResult<T extends string | string[] | TextBlock[]> {
     readonly glossariesMatches?: NGGlossaryMatch[] | NGGlossaryMatch[][];
     readonly profanities?: ProfanitiesResult;
     readonly styleguideResults?: StyleguideResults<T>;
+    readonly warnings?: {
+        /** Reasoning failed or completed without the requested image context. */
+        reasoning?: ReasoningFeedback;
+        references?: ReferenceRetrievalFailure;
+        prosa?: IntelligenceFailure;
+    };
 }
 
 export type TranslateOptions = {
@@ -93,6 +123,12 @@ export type TranslateOptions = {
     headers?: Record<string, string>;
     style?: TranslationStyle;
     reasoning?: boolean;
+    /**
+     * Visual context for text translation: one image, supplied as an object or array.
+     * Requires reasoning: true when non-empty. Inline images are limited
+     * to 5 MiB of decoded data. Omit or pass [] for text-only translation.
+     */
+    imageContext?: ImageContext | ImageContext[];
     metadata?: string | Record<string, unknown>;
     profanitiesDetect?: ProfanitiesDetect;
     profanitiesHandling?: ProfanitiesHandling;
@@ -188,6 +224,7 @@ export class Translator {
                 verbose: options?.verbose,
                 style: options?.style,
                 reasoning: options?.reasoning,
+                image_context: options?.imageContext,
                 metadata: options?.metadata,
                 profanities_detect: options?.profanitiesDetect,
                 profanities_handling: options?.profanitiesHandling,
