@@ -5,7 +5,7 @@ import { LaraApiError } from "../../errors";
 import { parseContent } from "../../utils/parse-content";
 import { version as SdkVersion } from "../../utils/sdk-version";
 
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 /** @internal */
 export type BaseURL = {
@@ -104,6 +104,15 @@ export abstract class LaraClient {
         headers?: Record<string, string>
     ): Promise<T> {
         return this.request("PUT", path, body, files, headers);
+    }
+
+    patch<T>(
+        path: string,
+        body?: Record<string, any>,
+        files?: Record<string, MultiPartFile>,
+        headers?: Record<string, string>
+    ): Promise<T> {
+        return this.request("PATCH", path, body, files, headers);
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
