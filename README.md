@@ -477,6 +477,29 @@ const memory = await lara.memories.create("MyMemory");
 // Create memory with external ID (MyMemory integration)
 const memory = await lara.memories.create("Memory from MyMemory", "aabb1122");  // Replace with actual external ID
 
+// listPaginated() supports optional name filtering and pagination. Called without options,
+// it returns the complete list of memories without pagination. Providing search, page,
+// or size enables pagination.
+const { items: memories, total: memoryTotal } = await lara.memories.listPaginated();
+
+// Providing page or size enables pagination (page starts at 1; size: 1-200).
+// The missing parameter defaults to page 1 or size 20.
+const memoryPage = await lara.memories.listPaginated({ page: 2, size: 50 });
+const memoryDefaultSize = await lara.memories.listPaginated({ page: 2 }); // Page 2, 20 per page
+const memoryFirstPage = await lara.memories.listPaginated({ size: 50 }); // Page 1, 50 per page
+
+// Pass search to filter by displayed name (case- and accent-insensitive).
+// It matches substrings and preserves spaces.
+// Combine search with page and size to paginate matching results.
+// If omitted, page defaults to 1 and size to 20.
+const memorySearch = await lara.memories.listPaginated({
+    search: "Marketing",
+    page: 2,
+    size: 50
+});
+
+// list() is deprecated; use listPaginated() instead.
+
 // Important: To update/overwrite a translation unit you must provide a tuid. Calls without a tuid always create a new unit and will not update existing entries.
 // Add translation to single memory
 const memoryImport = await lara.memories.addTranslation("mem_1A2b3C4d5E6f7G8h9I0jKl", "en-US", "fr-FR", "Hello", "Bonjour", "greeting_001");
@@ -548,6 +571,29 @@ for (const user of shares.users) console.log(`User ${user.name}: ${user.permissi
 // Create glossary
 const glossary = await lara.glossaries.create("MyGlossary");
 
+// listPaginated() supports optional name filtering and pagination. Called without options,
+// it returns the complete list of glossaries without pagination. Providing search, page,
+// or size enables pagination.
+const { items: glossaries, total: glossaryTotal } = await lara.glossaries.listPaginated();
+
+// Providing page or size enables pagination (page starts at 1; size: 1-200).
+// The missing parameter defaults to page 1 or size 20.
+const glossaryPage = await lara.glossaries.listPaginated({ page: 2, size: 50 });
+const glossaryDefaultSize = await lara.glossaries.listPaginated({ page: 2 }); // Page 2, 20 per page
+const glossaryFirstPage = await lara.glossaries.listPaginated({ size: 50 }); // Page 1, 50 per page
+
+// Pass search to filter by displayed name (case- and accent-insensitive).
+// It matches substrings and preserves spaces.
+// Combine search with page and size to paginate matching results.
+// If omitted, page defaults to 1 and size to 20.
+const glossarySearch = await lara.glossaries.listPaginated({
+    search: "Marketing",
+    page: 2,
+    size: 50
+});
+
+// list() is deprecated; use listPaginated() instead.
+
 // Import a glossary file (use "tbx" for TBX files)
 const glossaryFileStream = fs.createReadStream("/path/to/your/glossary.csv");
 const glossaryImport = await lara.glossaries.importFile(
@@ -602,8 +648,28 @@ const styleguide = await lara.styleguides.create(
     "Use a formal tone. Prefer British English spelling. Avoid contractions."
 );
 
-// List all styleguides
-const styleguides = await lara.styleguides.list();
+// listPaginated() supports optional name filtering and pagination. Called without options,
+// it returns the complete list of styleguides without pagination. Providing search, page,
+// or size enables pagination.
+const { items: styleguides, total: styleguideTotal } = await lara.styleguides.listPaginated();
+
+// Providing page or size enables pagination (page starts at 1; size: 1-200).
+// The missing parameter defaults to page 1 or size 20.
+const styleguidePage = await lara.styleguides.listPaginated({ page: 2, size: 50 });
+const styleguideDefaultSize = await lara.styleguides.listPaginated({ page: 2 }); // Page 2, 20 per page
+const styleguideFirstPage = await lara.styleguides.listPaginated({ size: 50 }); // Page 1, 50 per page
+
+// Pass search to filter by displayed name (case- and accent-insensitive).
+// It matches substrings and preserves spaces.
+// Combine search with page and size to paginate matching results.
+// If omitted, page defaults to 1 and size to 20.
+const styleguideSearch = await lara.styleguides.listPaginated({
+    search: "Marketing",
+    page: 2,
+    size: 50
+});
+
+// list() is deprecated; use listPaginated() instead.
 
 // Get a styleguide by ID (returns null if not found)
 const retrieved = await lara.styleguides.get("stg_1A2b3C4d5E6f7G8h9I0jKl");

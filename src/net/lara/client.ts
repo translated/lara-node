@@ -1,7 +1,9 @@
 import type { Readable } from "node:stream";
+import type { CollectionResult } from "../../collectionResult";
 import { AccessKey, AuthToken } from "../../credentials";
 import cryptoInstance, { type PortableCrypto } from "../../crypto";
 import { LaraApiError } from "../../errors";
+import { toCollectionResult } from "../../utils/collection-result";
 import { parseContent } from "../../utils/parse-content";
 import { version as SdkVersion } from "../../utils/sdk-version";
 
@@ -15,9 +17,9 @@ export type BaseURL = {
 };
 
 /** @internal */
-export type ClientResponse = {
+export type ClientResponse<T = any> = {
     statusCode: number;
-    body: any;
+    body: T;
     headers: Record<string, string | string[] | undefined>;
 };
 
@@ -65,6 +67,21 @@ export abstract class LaraClient {
 
     get<T>(path: string, queryParams?: Record<string, any>, headers?: Record<string, string>): Promise<T> {
         return this.request("GET", this.buildPathWithQuery(path, queryParams), undefined, undefined, headers);
+    }
+
+    async getCollection<T>(
+        path: string,
+        queryParams?: Record<string, any>,
+        headers?: Record<string, string>
+    ): Promise<CollectionResult<T>> {
+        const response = await this.requestWithMetadata<T[]>(
+            "GET",
+            this.buildPathWithQuery(path, queryParams),
+            undefined,
+            undefined,
+            headers
+        );
+        return toCollectionResult(response);
     }
 
     delete<T>(
@@ -128,6 +145,27 @@ export abstract class LaraClient {
         retryCount: number = 0,
         streamResponse?: boolean
     ): Promise<T> {
+        const response = await this.requestWithMetadata<T>(
+            method,
+            path,
+            body,
+            files,
+            headers,
+            retryCount,
+            streamResponse
+        );
+        return response.body;
+    }
+
+    private async requestWithMetadata<T>(
+        method: HttpMethod,
+        path: string,
+        body?: Record<string, any>,
+        files?: Record<string, MultiPartFile>,
+        headers?: Record<string, string>,
+        retryCount: number = 0,
+        streamResponse?: boolean
+    ): Promise<ClientResponse<T>> {
         await this.ensureAuthenticated();
 
         const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -139,14 +177,17 @@ export abstract class LaraClient {
         const response = await this.send(method, normalizedPath, requestHeaders, requestBody, streamResponse);
 
         if (this.isSuccessResponse(response)) {
-            return streamResponse ? (response.body as T) : (parseContent(response.body) as T);
+            return {
+                ...response,
+                body: streamResponse ? (response.body as T) : (parseContent(response.body) as T)
+            };
         }
 
         // Handle 401 - token expired, refresh and retry once
         if (response.statusCode === 401 && retryCount < 1) {
             this.token = undefined;
             await this.refreshOrReauthenticate();
-            return this.request(method, path, body, files, headers, retryCount + 1, streamResponse);
+            return this.requestWithMetadata(method, path, body, files, headers, retryCount + 1, streamResponse);
         }
 
         throw this.createApiError(response);

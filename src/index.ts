@@ -9,6 +9,7 @@ export {
     AudioUploadOptions,
     VoiceGender
 } from "./audioTranslator";
+export type { CollectionResult } from "./collectionResult";
 export { AccessKey, AuthToken, Credentials } from "./credentials";
 export {
     Document,
@@ -53,6 +54,7 @@ export {
 export { MultiPartFile } from "./net/lara/client";
 export type { LaraStream } from "./net/s3/laraStream";
 export type { PermissionMask } from "./permissions";
+export type { ResourceQueryOptions } from "./resourceQuery";
 export {
     Styleguide,
     StyleguideShareEntry,

@@ -1,6 +1,8 @@
+import type { CollectionResult } from "./collectionResult";
 import { LaraApiError } from "./errors";
 import type { LaraClient } from "./net/lara";
 import type { PermissionMask } from "./permissions";
+import type { ResourceQueryOptions } from "./resourceQuery";
 
 export interface Styleguide {
     id: string;
@@ -40,8 +42,18 @@ export class Styleguides {
         this.client = client;
     }
 
+    /** @deprecated Use listPaginated() instead. */
     async list(): Promise<Styleguide[]> {
         return await this.client.get<Styleguide[]>("/v2/styleguides");
+    }
+
+    /**
+     * List resources with optional name filtering and pagination.
+     * Without options, returns the complete list of resources without pagination.
+     * Providing search, page, or size enables pagination; omitted page and size default to 1 and 20.
+     */
+    async listPaginated(options?: ResourceQueryOptions): Promise<CollectionResult<Styleguide>> {
+        return await this.client.getCollection<Styleguide>("/v2/styleguides", options);
     }
 
     async get(id: string): Promise<Styleguide | null> {

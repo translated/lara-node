@@ -1,7 +1,9 @@
+import type { CollectionResult } from "./collectionResult";
 import { LaraApiError, TimeoutError } from "./errors";
 import type { LaraClient } from "./net/lara";
 import type { MultiPartFile } from "./net/lara/client";
 import type { PermissionMask } from "./permissions";
+import type { ResourceQueryOptions } from "./resourceQuery";
 
 export interface Glossary {
     readonly id: string;
@@ -67,8 +69,18 @@ export class Glossaries {
         this.pollingInterval = 2000;
     }
 
+    /** @deprecated Use listPaginated() instead. */
     async list(): Promise<Glossary[]> {
         return await this.client.get<Glossary[]>("/v2/glossaries");
+    }
+
+    /**
+     * List resources with optional name filtering and pagination.
+     * Without options, returns the complete list of resources without pagination.
+     * Providing search, page, or size enables pagination; omitted page and size default to 1 and 20.
+     */
+    async listPaginated(options?: ResourceQueryOptions): Promise<CollectionResult<Glossary>> {
+        return await this.client.getCollection<Glossary>("/v2/glossaries", options);
     }
 
     async create(name: string): Promise<Glossary> {
