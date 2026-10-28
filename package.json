@@ -1,6 +1,6 @@
 {
   "name": "@translated/lara",
-  "version": "1.18.0",
+  "version": "1.18.1",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "browser": "lib_browser/lara.min.js",
