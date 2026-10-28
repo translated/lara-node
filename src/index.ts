@@ -70,6 +70,7 @@ export {
     ProfanitiesResult,
     ProfanityDetectResult,
     QualityEstimationResult,
+    ReasoningEffort,
     ReasoningFeedback,
     ReasoningWarning,
     ReferenceRetrievalFailure,
