@@ -220,14 +220,14 @@ const result = await lara.translate("Hello", "en-US", "fr-FR", options);
 
 #### Reasoning Effort
 
-Set `effort` to `low`, `medium`, or `high` to control translation reasoning effort.
+Set `reasoningEffort` to `low`, `medium`, or `high` to control translation reasoning effort.
 Reasoning must be enabled. Omit the option to use the server default; the API
 validates the combination.
 
 ```typescript
 const result = await lara.translate("Hello", "en-US", "it-IT", {
     reasoning: true,
-    effort: "high"
+    reasoningEffort: "high"
 });
 ```
 

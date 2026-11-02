@@ -127,7 +127,7 @@ export type TranslateOptions = {
     style?: TranslationStyle;
     reasoning?: boolean;
     /** Requires reasoning: true. Omit to use the server default. */
-    effort?: ReasoningEffort;
+    reasoningEffort?: ReasoningEffort;
     /**
      * Visual context for text translation: one image, supplied as an object or array.
      * Requires reasoning: true when non-empty. Inline images are limited
@@ -229,7 +229,7 @@ export class Translator {
                 verbose: options?.verbose,
                 style: options?.style,
                 reasoning: options?.reasoning,
-                effort: options?.effort,
+                effort: options?.reasoningEffort,
                 image_context: options?.imageContext,
                 metadata: options?.metadata,
                 profanities_detect: options?.profanitiesDetect,
