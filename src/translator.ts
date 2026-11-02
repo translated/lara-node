@@ -115,6 +115,7 @@ export type TranslateOptions = {
     instructions?: string[];
     glossaries?: string[];
     contentType?: string;
+    /** @deprecated This parameter is deprecated. */
     multiline?: boolean;
     timeoutInMillis?: number;
     priority?: "normal" | "background";

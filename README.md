@@ -731,7 +731,6 @@ const TranslateOptions = {
     instructions: ["instruction"],                        // Translation instructions
     style: "fluid",                                       // Translation style (fluid, faithful, creative)
     contentType: "text/plain",                            // Content type (text/plain, text/html, etc.)
-    multiline: true,                                      // Enable multiline translation
     timeoutInMillis: 10000,                               // Request timeout in milliseconds
     sourceHint: "en",                                     // Hint for source language detection
     noTrace: false,                                       // Disable request tracing
